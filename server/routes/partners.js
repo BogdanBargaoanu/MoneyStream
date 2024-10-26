@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 //const jwt = require('jsonwebtoken');
-//const crypto = require('crypto');
+const crypto = require('crypto');
 
 /**
  * @openapi
@@ -47,13 +47,13 @@ var router = express.Router();
 router.get('/', function (req, res, next) {
     const query = 'SELECT * FROM partner';
     req.db.query(query, (err, result) => {
-      if (err) {
-        res.status(500).json({ error: err.message, success: false });
-        return;
-      }
-      res.json({result, success: true });
+        if (err) {
+            res.status(500).json({ error: err.message, success: false });
+            return;
+        }
+        res.json({ result, success: true });
     });
-  });
+});
 
 /**
  * @openapi
@@ -115,16 +115,143 @@ router.get('/', function (req, res, next) {
 router.get('/:username', function (req, res, next) {
     const query = 'SELECT * FROM partner WHERE username = ?';
     if (!req.params.username) {
-      res.status(400).json({ error: 'The request has missing information!' });
-      return;
+        res.status(400).json({ error: 'The request has missing information!', success: false });
+        return;
     }
     req.db.query(query, [req.params.username], (err, result) => {
-      if (err) {
-        res.status(500).json({ error: err.message, success: false });
-        return;
-      }
-      res.json({result, success: true });
+        if (err) {
+            res.status(500).json({ error: err.message, success: false });
+            return;
+        }
+        res.json({ result, success: true });
     });
-  });
+});
+
+/**
+ * @openapi
+ * /partners/addPartner:
+ *   post:
+ *     tags:
+ *      - partners
+ *     description: Add an partner.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 password:
+ *                   type: string
+ *                 information:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Partner added successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Error caused by an inappropriate input.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 error:
+ *                   type: string
+ * */
+
+router.post('/addPartner', function (req, res, next) {
+    const insertQuery = 'INSERT INTO partner (username, email, password, information) VALUES (?, ?, ?, ?)';
+    const checkPartner = 'SELECT COUNT(idPartner) AS count FROM partner WHERE username = ? || email = ?';
+
+    if (!req.body.username || !req.body.password || !req.body.email) {
+        res.status(400).json({ success: false, error: 'Please fill out all the fields!' });
+        return;
+    }
+    if (req.body.username.length < 5) {
+        res.status(400).json({ success: false, error: 'The username must have at least 5 characters!' });
+        return;
+    }
+    if (req.body.password.length < 5) {
+        res.status(400).json({ success: false, error: 'The password must have at least 5 characters!' });
+        return;
+    }
+    if (req.body.username.length > 30) {
+        res.status(400).json({ success: false, error: 'The username must have at most 30 characters!' });
+        return;
+    }
+    if (req.body.password.length > 30) {
+        res.status(400).json({ success: false, error: 'The password must have at most 30 characters!' });
+        return;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(req.body.password); // regex test for uppercase
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(req.body.password); // regex test for special char
+    if (!hasUpperCase || !hasSpecialChar) {
+        res.status(400).json({ success: false, error: 'The password must have at least one uppercase letter and one special character!' });
+        return;
+    }
+    // Hash the password using MD5
+    const hashedPassword = crypto.createHash('md5').update(req.body.password).digest('hex');
+    req.db.beginTransaction((err) => {
+
+        if (err) {
+            res.status(500).json({ success: false, error: err.message });
+            return;
+        }
+
+        req.db.query(checkPartner, [req.body.username, req.body.email], (err, result) => {
+            if (err) {
+                res.status(500).json({ success: false, error: err.message });
+                return;
+            }
+            if (result[0]['count'] > 0) {
+                res.status(400).json({ success: false, error: 'The partner already exists!' });
+                return;
+            }
+
+            req.db.query(insertQuery, [req.body.username, req.body.email, hashedPassword, req.body.information], (err, result) => {
+                if (err) {
+                    res.status(500).json({ success: false, error: err.message });
+                    return;
+                }
+
+                req.db.commit((err) => {
+                    if (err) {
+                        return req.db.rollback(() => {
+                            res.status(500).json({ success: false, error: err.message });
+                        });
+                    }
+                    res.json({ success: true, message: 'Partner added successfully!' });
+                });
+            });
+        });
+    });
+});
 
 module.exports = router;
