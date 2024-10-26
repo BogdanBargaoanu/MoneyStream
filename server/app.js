@@ -33,6 +33,50 @@ const options = {
 const openapiSpecification = swaggerJsdoc(options);
 app.use('/api', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 
+// mysql setup
+const mysql = require('mysql');
+
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'c4shfl0w4pp',
+  database: 'exchange'
+});
+
+db.connect((err) => {
+  if (err) {
+    throw err;
+  }
+  else {
+    console.log('Connected to database');
+    const createPartnerTable = `CREATE TABLE IF NOT EXISTS partner (
+                                idPartner INT NOT NULL AUTO_INCREMENT,
+                                username VARCHAR(100) NOT NULL,
+                                email VARCHAR(100) NOT NULL,
+                                password VARCHAR(100) NOT NULL,
+                                information VARCHAR(6000) NULL,
+                                UNIQUE INDEX idPartner_UNIQUE (idPartner ASC) VISIBLE,
+                                PRIMARY KEY (idPartner),
+                                UNIQUE INDEX username_UNIQUE (username ASC) VISIBLE,
+                                UNIQUE INDEX email_UNIQUE (email ASC) VISIBLE)`;
+    db.query(createPartnerTable, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log('Partner table checked/created successfully.');
+      }
+    });
+  }
+});
+
+// make db accessible to your routes
+app.use((req, res, next) => {
+  req.db = db;
+  next();
+});
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
