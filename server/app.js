@@ -40,7 +40,6 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: 'c4shfl0w4pp',
-  database: 'exchange'
 });
 
 db.connect((err) => {
@@ -48,8 +47,20 @@ db.connect((err) => {
     throw err;
   }
   else {
-    console.log('Connected to database');
-    var createPartnerTable = `CREATE TABLE IF NOT EXISTS partner (
+    // Create database if it doesn't exist
+    db.query('CREATE DATABASE IF NOT EXISTS exchange', (err, result) => {
+      if (err) {
+        throw err;
+      }
+      console.log('Database created or already exists.');
+
+      // Connect to the newly created or existing database
+      db.changeUser({ database: 'exchange' }, (err) => {
+        if (err) {
+          throw err;
+        }
+        console.log('Connected to database.');
+        var createPartnerTable = `CREATE TABLE IF NOT EXISTS partner (
                                 idPartner INT NOT NULL AUTO_INCREMENT,
                                 username VARCHAR(100) NOT NULL,
                                 email VARCHAR(100) NOT NULL,
@@ -59,7 +70,7 @@ db.connect((err) => {
                                 PRIMARY KEY (idPartner),
                                 UNIQUE INDEX username_UNIQUE (username ASC) VISIBLE,
                                 UNIQUE INDEX email_UNIQUE (email ASC) VISIBLE)`;
-    var createLocationTable = `CREATE TABLE IF NOT EXISTS location (
+        var createLocationTable = `CREATE TABLE IF NOT EXISTS location (
                                 idLocation INT NOT NULL AUTO_INCREMENT,
                                 idPartner INT NOT NULL,
                                 latitude DOUBLE NOT NULL,
@@ -74,13 +85,13 @@ db.connect((err) => {
                                   REFERENCES partner (idPartner)
                                   ON DELETE CASCADE
                                   ON UPDATE NO ACTION)`;
-    var createCurrencyTable = `CREATE TABLE IF NOT EXISTS currency (
+        var createCurrencyTable = `CREATE TABLE IF NOT EXISTS currency (
                                 idCurrency INT NOT NULL AUTO_INCREMENT,
                                 name VARCHAR(50) NOT NULL,
                                 PRIMARY KEY (idCurrency),
                                 UNIQUE INDEX idCurrency_UNIQUE (idCurrency ASC) VISIBLE,
                                 UNIQUE INDEX name_UNIQUE (name ASC) VISIBLE)`;
-    var createRateTable = `CREATE TABLE IF NOT EXISTS rate (
+        var createRateTable = `CREATE TABLE IF NOT EXISTS rate (
                             idRates INT NOT NULL AUTO_INCREMENT,
                             idLocation INT NOT NULL,
                             idCurrency INT NOT NULL,
@@ -100,37 +111,39 @@ db.connect((err) => {
                               REFERENCES currency (idCurrency)
                               ON DELETE CASCADE
                               ON UPDATE NO ACTION)`
-    db.query(createPartnerTable, (err, result) => {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log('Partner table checked/created successfully.');
-      }
-    });
-    db.query(createLocationTable, (err, result) => {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log('Location table checked/created successfully.');
-      }
-    });
-    db.query(createCurrencyTable, (err, result) => {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log('Currency table checked/created successfully.');
-      }
-    });
-    db.query(createRateTable, (err, result) => {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log('Rate table checked/created successfully.');
-      }
+        db.query(createPartnerTable, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Partner table checked/created successfully.');
+          }
+        });
+        db.query(createLocationTable, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Location table checked/created successfully.');
+          }
+        });
+        db.query(createCurrencyTable, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Currency table checked/created successfully.');
+          }
+        });
+        db.query(createRateTable, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Rate table checked/created successfully.');
+          }
+        });
+      });
     });
   }
 });
