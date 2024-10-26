@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-//const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 /**
@@ -251,6 +251,85 @@ router.post('/addPartner', function (req, res, next) {
                 });
             });
         });
+    });
+});
+
+/**
+ * @openapi
+ * /partners/login:
+ *   post:
+ *     tags:
+ *      - partners
+ *     description: Login a partner.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 token:
+ *                   type: string
+ *       401:
+ *         description: Bad login.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 error:
+ *                   type: string
+ */
+router.post('/login', function (req, res, next) {
+    const { username, password } = req.body;
+    const query = 'SELECT * FROM partner WHERE username = ?';
+
+    // Hash the password using MD5
+    const hashedPassword = crypto.createHash('md5').update(password).digest('hex');
+
+    req.db.query(query, [username], (err, results) => {
+        if (err) {
+            res.status(500).json({ success: false, error: err.message });
+            return;
+        }
+        if (results.length > 0) {
+            const partner = results[0];
+            if (partner.password == hashedPassword) {
+                const token = jwt.sign({ id: partner.idPartner }, 'exchange-secret-key', { expiresIn: '24h' });
+                res.json({ success: true, token: token });
+            } else {
+                res.status(401).json({ success: false, error: 'Incorrect login details!' });
+            }
+        } else {
+            res.status(401).json({ success: false, error: 'Incorrect login details!' });
+        }
     });
 });
 
