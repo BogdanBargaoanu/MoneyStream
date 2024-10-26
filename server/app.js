@@ -49,7 +49,7 @@ db.connect((err) => {
   }
   else {
     console.log('Connected to database');
-    const createPartnerTable = `CREATE TABLE IF NOT EXISTS partner (
+    var createPartnerTable = `CREATE TABLE IF NOT EXISTS partner (
                                 idPartner INT NOT NULL AUTO_INCREMENT,
                                 username VARCHAR(100) NOT NULL,
                                 email VARCHAR(100) NOT NULL,
@@ -59,12 +59,35 @@ db.connect((err) => {
                                 PRIMARY KEY (idPartner),
                                 UNIQUE INDEX username_UNIQUE (username ASC) VISIBLE,
                                 UNIQUE INDEX email_UNIQUE (email ASC) VISIBLE)`;
+    var createLocationTable = `CREATE TABLE IF NOT EXISTS location (
+                                idLocation INT NOT NULL AUTO_INCREMENT,
+                                idPartner INT NOT NULL,
+                                latitude DOUBLE NOT NULL,
+                                longitude DOUBLE NOT NULL,
+                                address VARCHAR(200) NOT NULL,
+                                information VARCHAR(6000) NULL,
+                                PRIMARY KEY (idLocation),
+                                UNIQUE INDEX idLocations_UNIQUE (idLocation ASC) VISIBLE,
+                                INDEX FK_PartnerLocation_idx (idPartner ASC) VISIBLE,
+                                CONSTRAINT FK_PartnerLocation
+                                  FOREIGN KEY (idPartner)
+                                  REFERENCES partner (idPartner)
+                                  ON DELETE CASCADE
+                                  ON UPDATE NO ACTION)`;
     db.query(createPartnerTable, (err, result) => {
       if (err) {
         console.log(err);
       }
       else {
         console.log('Partner table checked/created successfully.');
+      }
+    });
+    db.query(createLocationTable, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log('Location table checked/created successfully.');
       }
     });
   }
