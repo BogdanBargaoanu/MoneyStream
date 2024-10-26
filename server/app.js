@@ -74,6 +74,12 @@ db.connect((err) => {
                                   REFERENCES partner (idPartner)
                                   ON DELETE CASCADE
                                   ON UPDATE NO ACTION)`;
+    var createCurrencyTable = `CREATE TABLE IF NOT EXISTS currency (
+                                idCurrency INT NOT NULL AUTO_INCREMENT,
+                                name VARCHAR(50) NOT NULL,
+                                PRIMARY KEY (idCurrency),
+                                UNIQUE INDEX idCurrency_UNIQUE (idCurrency ASC) VISIBLE,
+                                UNIQUE INDEX name_UNIQUE (name ASC) VISIBLE);`;
     db.query(createPartnerTable, (err, result) => {
       if (err) {
         console.log(err);
@@ -88,6 +94,14 @@ db.connect((err) => {
       }
       else {
         console.log('Location table checked/created successfully.');
+      }
+    });
+    db.query(createCurrencyTable, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log('Currency table checked/created successfully.');
       }
     });
   }
