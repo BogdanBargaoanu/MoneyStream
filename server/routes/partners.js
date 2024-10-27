@@ -322,7 +322,7 @@ router.post('/login', function (req, res, next) {
         if (results.length > 0) {
             const partner = results[0];
             if (partner.password == hashedPassword) {
-                const token = jwt.sign({ id: partner.idPartner }, 'exchange-secret-key', { expiresIn: '24h' });
+                const token = jwt.sign({ id: partner.idPartner, username: partner.username }, 'exchange-secret-key', { expiresIn: '24h' });
                 res.json({ success: true, token: token });
             } else {
                 res.status(401).json({ success: false, error: 'Incorrect login details!' });

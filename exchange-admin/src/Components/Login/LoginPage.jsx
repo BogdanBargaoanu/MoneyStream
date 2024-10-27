@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import axios from 'axios'
 import './LoginPage.css'
 import Toast from 'react-bootstrap/Toast'
 import user_icon from '../Assets/person.png'
@@ -8,10 +9,28 @@ import logo from '../Assets/logo.png'
 
 const LoginPage = () => {
     const [action, setAction] = useState("Login");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
     const [showToast, setShowToast] = useState(false);
-    const toastMessage = "";
+    const [toastMessage, setToastMessage] = useState("");
+
     const handleLogin = () => {
-        setShowToast(true);
+        axios.post('http://localhost:3000/partners/login', {
+            username: username,
+            password: password
+        })
+            .then(response => {
+                if (response.data.success) {
+                    // The login was successful
+                    localStorage.setItem('user-token', response.data.token);
+                    window.location.href = '/dashboard';
+                }
+            })
+            .catch(error => {
+                setToastMessage('Invalid login: ' + (error.response?.data?.error || 'Unknown error'));
+                setShowToast(true);
+            });
     };
     return (
         <div className="container-login">
@@ -20,18 +39,20 @@ const LoginPage = () => {
                 <div className="underline"></div>
             </div>
             <div className="inputs">
+
                 {action === "Login" ? <div></div> : <div className="input">
-                    <img src={user_icon} alt="" />
-                    <input type="text" placeholder="Username" />
+                    <img src={email_icon} alt="" />
+                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>}
 
                 <div className="input">
-                    <img src={email_icon} alt="" />
-                    <input  type="email" placeholder="Email" />
+                    <img src={user_icon} alt="" />
+                    <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
                 </div>
+
                 <div className="input">
                     <img src={password_icon} alt="" />
-                    <input type="password" placeholder="Password" />
+                    <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
             </div>
             <div className="submit-container">

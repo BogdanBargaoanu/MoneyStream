@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 
 const isAuthenticated = () => {
   // Replace this with your actual authentication logic
-  return !!localStorage.getItem('token');
+  return !!localStorage.getItem('user-token');
 };
 
 const PrivateRoute = ({ component: Component }) => {
