@@ -216,6 +216,13 @@ router.post('/addPartner', function (req, res, next) {
         res.status(400).json({ success: false, error: 'The password must have at least one uppercase letter and one special character!' });
         return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(req.body.email)) {
+        res.status(400).json({ success: false, error: 'Invalid email format!' });
+        return;
+    }
+
     // Hash the password using MD5
     const hashedPassword = crypto.createHash('md5').update(req.body.password).digest('hex');
     req.db.beginTransaction((err) => {
@@ -322,7 +329,7 @@ router.post('/login', function (req, res, next) {
         if (results.length > 0) {
             const partner = results[0];
             if (partner.password == hashedPassword) {
-                const token = jwt.sign({ id: partner.idPartner }, 'exchange-secret-key', { expiresIn: '24h' });
+                const token = jwt.sign({ id: partner.idPartner, username: partner.username }, 'exchange-secret-key', { expiresIn: '24h' });
                 res.json({ success: true, token: token });
             } else {
                 res.status(401).json({ success: false, error: 'Incorrect login details!' });

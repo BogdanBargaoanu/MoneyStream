@@ -4,7 +4,7 @@
     --disabled: #eaeaea;
 }
 
-.container {
+.container-login {
     display: flex;
     flex-direction: column;
     margin: auto;
@@ -15,6 +15,7 @@
     max-width: 30%;
     border-radius: 2rem;
     box-shadow: 30px 30px 30px rgba(0, 0, 0, 0.25);
+    animation: slide-up-fade-in 1s ease;
 }
 
 .header {
