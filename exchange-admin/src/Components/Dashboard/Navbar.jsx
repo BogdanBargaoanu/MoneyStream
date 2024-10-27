@@ -11,6 +11,11 @@ function Navbar() {
 
   const showSidebar = () => setSidebar(!sidebar);
 
+  const logout = () => {
+    localStorage.removeItem('user-token');
+    window.location.href = '/login';
+  };
+
   return (
     <>
       <IconContext.Provider value={{ color: '#fff' }}>
@@ -37,6 +42,7 @@ function Navbar() {
               );
             })}
           </ul>
+          <button className="btn-logout" onClick={logout}>Logout</button>
         </nav>
       </IconContext.Provider>
     </>

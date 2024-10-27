@@ -1,3 +1,8 @@
+:root {
+  --logout-color: #f5f5f5;
+  --logout-color-text: #060b26;
+}
+
 .App {
   text-align: center;
 }
@@ -47,4 +52,22 @@
       transform: translateY(0);
       opacity: 1;
   }
+}
+
+.btn-logout:hover {
+    transform: translateY(-5px);
+}
+
+.btn-logout {
+  border: none;
+  position: absolute;
+  bottom: 3rem;
+  background-color: var(--logout-color);
+  color: var(--logout-color-text);
+  border-radius: 1rem;
+  padding: 0.5rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 0.5s ease;
 }
