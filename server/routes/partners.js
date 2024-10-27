@@ -216,6 +216,13 @@ router.post('/addPartner', function (req, res, next) {
         res.status(400).json({ success: false, error: 'The password must have at least one uppercase letter and one special character!' });
         return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(req.body.email)) {
+        res.status(400).json({ success: false, error: 'Invalid email format!' });
+        return;
+    }
+
     // Hash the password using MD5
     const hashedPassword = crypto.createHash('md5').update(req.body.password).digest('hex');
     req.db.beginTransaction((err) => {

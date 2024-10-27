@@ -32,6 +32,29 @@ const LoginPage = () => {
                 setShowToast(true);
             });
     };
+
+    const handleSignUp = () => {
+        axios.post('http://localhost:3000/partners/addPartner', {
+            username: username,
+            email: email,
+            password: password,
+            information: `Registration date:${Date.now().toString()}`
+        })
+            .then(response => {
+                if (response.data.success) {
+                    // The registration was successful
+                    setUsername("");
+                    setPassword("");
+                    setToastMessage('Registration successful. Please login.');
+                    setShowToast(true);
+                    setAction("Login");
+                }
+            })
+            .catch(error => {
+                setToastMessage('Invalid registration: ' + (error.response?.data?.error || 'Unknown error'));
+                setShowToast(true);
+            });
+    };
     return (
         <div className="container-login">
             <div className="header">
@@ -56,7 +79,7 @@ const LoginPage = () => {
                 </div>
             </div>
             <div className="submit-container">
-                <div className={action === "Login" ? "submit gray" : "submit"} onClick={() => { setAction("Sign Up") }}>Sign-up</div>
+                <div className={action === "Login" ? "submit gray" : "submit"} onClick={() => { action === "Sign Up" ? handleSignUp() : setAction("Sign Up") }}>Sign-up</div>
                 <div className={action === "Sign Up" ? "submit gray" : "submit"} onClick={() => { action === "Login" ? handleLogin() : setAction("Login") }}>Login</div>
             </div>
             <Toast position="top-end" className="p-3" style={{ position: 'absolute', top: 0, right: 0 }} onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
