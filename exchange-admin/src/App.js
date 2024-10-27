@@ -3,6 +3,8 @@ import './App.css';
 import LoginPage from './Components/Login/LoginPage';
 import DashboardPage from './Components/Dashboard/DashboardPage';
 import PrivateRoute from './PrivateRoute';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.bundle.js';
 
 function App() {
   return (

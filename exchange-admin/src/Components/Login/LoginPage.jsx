@@ -8,7 +8,7 @@ const LoginPage = () => {
     const [action, setAction] = useState("Login");
 
     return (
-        <div className="container">
+        <div className="container-login">
             <div className="header">
                 <div className="text">{action}</div>
                 <div className="underline"></div>
