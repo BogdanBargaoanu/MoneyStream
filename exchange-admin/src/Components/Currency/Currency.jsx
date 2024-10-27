@@ -1,17 +1,17 @@
 import React from 'react';
-import Navbar from './Navbar'
-import menu from '../Assets/main-menu.png'
-import './Dashboard.css'
+import Navbar from '../Dashboard/Navbar'
 import logo from '../Assets/logo.png'
+import './Currency.css'
 
-const DashboardPage = () => {
+const Currency = () => {
 
     return (
         <div>
             <Navbar />
             <img className="logo" src={logo} alt="" />
+            <h1>CURRENCY</h1>
         </div>
     );
 }
 
-export default DashboardPage;
+export default Currency;
