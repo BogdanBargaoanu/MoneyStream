@@ -1,37 +1,54 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../Dashboard/Navbar'
-import fakeData from "./MOCK_DATA.json";
+import axios from 'axios';
+//import fakeData from "./MOCK_DATA.json";
 import logo from '../Assets/logo.png'
 import { useTable } from 'react-table'
 import './Partners.css'
 
 const Partners = () => {
-    const data = React.useMemo(() => fakeData, []);
+    const [partners, setPartners] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+
+    const fetchPartners = () => {
+        axios.get('http://localhost:3000/partners')
+            .then(response => {
+                if (response.data.success) {
+                    console.log(response.data.result);
+                    setPartners(response.data.result);
+                }
+                else {
+                    console.error('Failed to fetch partners');
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    };
+    useEffect(() => {
+        fetchPartners();
+        setIsLoading(false);
+    }, []);
+
+    var data = React.useMemo(() => partners, [partners]);
     const columns = React.useMemo(
         () => [
             {
                 Header: "ID",
-                accessor: "id",
+                accessor: "idPartner",
             },
             {
-                Header: "First Name",
-                accessor: "first_name",
-            },
-            {
-                Header: "Last Name",
-                accessor: "last_name",
+                Header: "Username",
+                accessor: "username",
             },
             {
                 Header: "Email",
                 accessor: "email",
             },
             {
-                Header: "Gender",
-                accessor: "gender",
-            },
-            {
-                Header: "University",
-                accessor: "university",
+                Header: "Information",
+                accessor: "information",
             },
         ],
         []
@@ -45,7 +62,7 @@ const Partners = () => {
             <Navbar />
             <img className="logo" src={logo} alt="" />
             <div className="table-container">
-                <table {...getTableProps()}>
+                {isLoading ? (<h1>Loading partners...</h1>) : (<table {...getTableProps()}>
                     <thead>
                         {headerGroups.map((headerGroup) => (
                             <tr {...headerGroup.getHeaderGroupProps()}>
@@ -69,7 +86,7 @@ const Partners = () => {
                             );
                         })}
                     </tbody>
-                </table>
+                </table>)}
             </div>
         </div>
     );
