@@ -128,3 +128,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+exchange-admin/src/Components/Partners/MOCK_DATA.json
