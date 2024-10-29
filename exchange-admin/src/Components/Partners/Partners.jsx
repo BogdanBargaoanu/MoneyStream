@@ -61,7 +61,7 @@ const Partners = () => {
         <div>
             <Navbar />
             <img className="logo" src={logo} alt="" />
-            <div className="table-container">
+            <div id="partners-table" className="table-container">
                 {isLoading ? (<h1>Loading partners...</h1>) : (<table {...getTableProps()}>
                     <thead>
                         {headerGroups.map((headerGroup) => (
