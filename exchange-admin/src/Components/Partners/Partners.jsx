@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Navbar from '../Dashboard/Navbar'
 import axios from 'axios';
 //import fakeData from "./MOCK_DATA.json";
@@ -8,7 +8,9 @@ import './Partners.css'
 
 const Partners = () => {
     const [partners, setPartners] = React.useState([]);
+    const [filteredPartners, setFilteredPartners] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [searchValue, setSearchValue] = React.useState(null);
 
     const fetchPartners = () => {
         axios.get('http://localhost:3000/partners')
@@ -16,6 +18,7 @@ const Partners = () => {
                 if (response.data.success) {
                     console.log(response.data.result);
                     setPartners(response.data.result);
+                    setFilteredPartners(response.data.result);
                 }
                 else {
                     console.error('Failed to fetch partners');
@@ -31,8 +34,14 @@ const Partners = () => {
         setIsLoading(false);
     }, []);
 
-    var data = React.useMemo(() => partners, [partners]);
-    const columns = React.useMemo(
+    const handleSearch = (event) => {
+        setFilteredPartners(partners.filter(partner =>
+            partner.username && partner.username.toLowerCase().includes(event.target.value.toLowerCase())));
+        setSearchValue(event.target.value);
+    };
+
+    var data = useMemo(() => filteredPartners, [filteredPartners]);
+    const columns = useMemo(
         () => [
             {
                 Header: "ID",
@@ -61,7 +70,22 @@ const Partners = () => {
         <div>
             <Navbar />
             <img className="logo" src={logo} alt="" />
+            <div class="input-group mb-3 search-box">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                </div>
+                <input
+                    className='form-control'
+                    type="text"
+                    placeholder="Search by name"
+                    value={searchValue}
+                    onChange={handleSearch}
+                    style={{ marginBottom: 20 }}
+                />
+            </div>
             <div id="partners-table" className="table-container">
+
+
                 {isLoading ? (<h1>Loading partners...</h1>) : (<table {...getTableProps()}>
                     <thead>
                         {headerGroups.map((headerGroup) => (
