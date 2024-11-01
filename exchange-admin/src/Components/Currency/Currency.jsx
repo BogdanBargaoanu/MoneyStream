@@ -14,7 +14,12 @@ const Currency = () => {
     const [id, setId] = useState(null);
 
     const fetchCurrencies = () => {
-        axios.get('http://localhost:3000/currency')
+        const token = localStorage.getItem('user-token');
+        axios.get('http://localhost:3000/currency', {
+            headers: {
+                Authorization: `Bearer ${token}` // send the token in the Authorization header
+            }
+        })
             .then(response => {
                 if (response.data.success) {
                     setCurrencies(response.data.result);
