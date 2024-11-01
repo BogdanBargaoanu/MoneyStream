@@ -8,6 +8,8 @@ import './Currency.css'
 const Currency = () => {
     const [currencies, setCurrencies] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [filteredCurrencies, setFilteredCurrencies] = React.useState([]);
+    const [searchValue, setSearchValue] = React.useState(null);
 
     const fetchCurrencies = () => {
         axios.get('http://localhost:3000/currency')
@@ -30,7 +32,23 @@ const Currency = () => {
         setIsLoading(false);
     }, []);
 
-    var data = React.useMemo(() => currencies, [currencies]);
+    const handleSearch = (event) => {
+        const value = event.target.value;
+        setSearchValue(value);
+        filter(value);
+    };
+
+    const filter = (value) => {
+        if (value) {
+            setFilteredCurrencies(currencies.filter(currency =>
+                currency.name && currency.name.toLowerCase().includes(value.toLowerCase())));
+        }
+        else {
+            setFilteredCurrencies(currencies);
+        }
+    };
+
+    var data = React.useMemo(() => filteredCurrencies, [filteredCurrencies]);
     const columns = React.useMemo(
         () => [
             {
@@ -52,6 +70,19 @@ const Currency = () => {
         <div>
             <Navbar />
             <img className="logo" src={logo} alt="" />
+            <div class="input-group mb-3 search-box">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                </div>
+                <input
+                    className='form-control'
+                    type="text"
+                    placeholder="Search by username"
+                    value={searchValue}
+                    onChange={handleSearch}
+                    style={{ marginBottom: 20 }}
+                />
+            </div>
             <div id="currency-table" className="table-container">
                 {isLoading ? (<h1>Loading currencies...</h1>) : (<table {...getTableProps()}>
                     <thead>

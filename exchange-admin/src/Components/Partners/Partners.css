@@ -65,6 +65,11 @@ tbody td:hover:before {
     border-radius: 100px;
 }
 
+.partners-container {
+    display: flex;
+    justify-content: center;
+}
+
 .search-box {
     margin-top: 10px;
 }

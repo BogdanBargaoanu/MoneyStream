@@ -35,9 +35,19 @@ const Partners = () => {
     }, []);
 
     const handleSearch = (event) => {
-        setFilteredPartners(partners.filter(partner =>
-            partner.username && partner.username.toLowerCase().includes(event.target.value.toLowerCase())));
-        setSearchValue(event.target.value);
+        const value = event.target.value;
+        setSearchValue(value);
+        filter(value);
+    };
+
+    const filter = (value) => {
+        if (value) {
+            setFilteredPartners(partners.filter(partner =>
+                partner.username && partner.username.toLowerCase().includes(value.toLowerCase())));
+        }
+        else {
+            setFilteredPartners(partners);
+        }
     };
 
     var data = useMemo(() => filteredPartners, [filteredPartners]);
@@ -77,15 +87,13 @@ const Partners = () => {
                 <input
                     className='form-control'
                     type="text"
-                    placeholder="Search by name"
+                    placeholder="Search by username"
                     value={searchValue}
                     onChange={handleSearch}
                     style={{ marginBottom: 20 }}
                 />
             </div>
             <div id="partners-table" className="table-container">
-
-
                 {isLoading ? (<h1>Loading partners...</h1>) : (<table {...getTableProps()}>
                     <thead>
                         {headerGroups.map((headerGroup) => (
