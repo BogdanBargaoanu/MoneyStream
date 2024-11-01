@@ -71,3 +71,28 @@
   font-weight: 700;
   transition: transform 0.5s ease;
 }
+
+.btn-insert {
+  position: fixed;
+  top: 85%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  width: 20%;
+  height: 7%;
+  background: linear-gradient(var(--insert-button-color1), var(--inser-button-color2));
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--insert-button-text);
+  border-radius: 1rem;
+  animation: slide-up-fade-in 1.5s ease;
+  transition: transform 0.5s ease;
+  border: none;
+  font-size: 1rem;
+  box-shadow: 7px 7px 7px 1px var(--box-shadow-color);
+}
+
+.btn-insert:hover {
+  transform: translateY(-5px);
+}

@@ -16,7 +16,6 @@ const Partners = () => {
         axios.get('http://localhost:3000/partners')
             .then(response => {
                 if (response.data.success) {
-                    console.log(response.data.result);
                     setPartners(response.data.result);
                     setFilteredPartners(response.data.result);
                 }
