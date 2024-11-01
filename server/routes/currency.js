@@ -34,9 +34,31 @@ const jwt = require('jsonwebtoken');
  *                   type: string
  *                 success:
  *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 router.get('/', function (req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).json({ error: 'No authorization header', success: false });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1]; // get the token from the Authorization header
+  let userId;
+  try {
+    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    userId = decoded.id; // get the partner ID from the decoded token
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token', success: false });
+    return;
+  }
+
   const query = `SELECT * FROM currency`;
   req.db.query(query, (err, result) => {
     if (err) {
@@ -98,9 +120,31 @@ router.get('/', function (req, res, next) {
  *                   type: string
  *                 success:
  *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  * */
 
 router.post('/insert', function (req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).json({ error: 'No authorization header', success: false });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1]; // get the token from the Authorization header
+  let userId;
+  try {
+    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    userId = decoded.id; // get the partner ID from the decoded token
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token', success: false });
+    return;
+  }
+
   const insertQuery = 'INSERT INTO currency (name) VALUES (?)';
   const checkName = 'SELECT COUNT(idCurrency) AS count FROM currency WHERE name = ?';
   if (!req.body.name) {
