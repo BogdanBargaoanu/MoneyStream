@@ -16,11 +16,12 @@ const Currency = () => {
 
     const fetchCurrencies = () => {
         const token = localStorage.getItem('user-token');
-        axios.get('http://localhost:3000/currency', {
-            headers: {
-                Authorization: `Bearer ${token}` // send the token in the Authorization header
-            }
-        })
+        axios.get('http://localhost:3000/currency',
+            {
+                headers: {
+                    Authorization: `Bearer ${token}` // send the token in the Authorization header
+                }
+            })
             .then(response => {
                 if (response.data.success) {
                     setCurrencies(response.data.result);
@@ -116,10 +117,11 @@ const Currency = () => {
     const deleteCurrency = (currency) => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
         axios.delete(`http://localhost:3000/currency/delete`, {
+            idCurrency: id
+        }, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            },
-            data: { idCurrency: currency.idCurrency }
+            }
         })
             .then(response => {
                 if (response.data.success) {
@@ -180,6 +182,37 @@ const Currency = () => {
 
     const updateCurrency = () => {
         console.log("Updating currency with id: ", id);
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.put(`http://localhost:3000/currency/update`, {
+            idCurrency: id,
+            name: name
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    setCurrencies(currencies.map(currency =>
+                        currency.idCurrency === id ? { ...currency, name: name } : currency
+                    ));
+                    setFilteredCurrencies(filteredCurrencies.map(currency =>
+                        currency.idCurrency === id ? { ...currency, name: name } : currency
+                    ));
+                    filter(searchValue);
+                    setName('');
+                    setId(null);
+                } else {
+                    console.error('Failed to update currency');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error updating currency:', error);
+            });
     };
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
