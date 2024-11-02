@@ -143,6 +143,45 @@ const Currency = () => {
         setId(null);
     };
 
+    const insertCurrency = () => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.post(`http://localhost:3000/currency/insert`, {
+            name: name
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    /*// Assuming the response contains the new currency data
+                    const newCurrency = response.data.currency;
+                    setCurrencies([...currencies, newCurrency]);
+                    setFilteredCurrencies([...filteredCurrencies, newCurrency]);
+                    setName('');
+                    setId(null);
+                    */
+                    fetchCurrencies();
+                    filter(searchValue);
+                    setName('');
+                    setId(null);
+                } else {
+                    console.error('Failed to insert currency');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error inserting currency:', error);
+            });
+    };
+
+    const updateCurrency = () => {
+        console.log("Updating currency with id: ", id);
+    };
+
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({ columns, data });
 
@@ -212,7 +251,7 @@ const Currency = () => {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onClick={() => id === null ? insertCurrency() : updateCurrency()}>Save changes</button>
                         </div>
                     </div>
                 </div>
