@@ -11,6 +11,7 @@ const Currency = () => {
     const [filteredCurrencies, setFilteredCurrencies] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
     const [name, setName] = useState('');
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [id, setId] = useState(null);
 
     const fetchCurrencies = () => {
@@ -27,6 +28,10 @@ const Currency = () => {
                 }
                 else {
                     console.error('Failed to fetch partners');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
                 }
 
             })
@@ -70,11 +75,16 @@ const Currency = () => {
                 Header: "Actions",
                 Cell: ({ row }) => (
                     <>
-                        <button onClick={() => handleButtonClick(row.original)} type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCurrency">
+                        <button onClick={() => handleUpdate(row.original)} type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCurrency">
                             Update
                         </button>
-                        <button type="button" class="btn btn-danger">
-                            Delete
+                        <button class="btn-delete" onClick={(e) => toggleDeleteConfirmation(e, row.original)}>
+                            <span class="delete-message">CONFIRM DELETE</span>
+                            <svg className="delete-svg" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2" >
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                         </button>
                     </>
                 ),
@@ -83,10 +93,49 @@ const Currency = () => {
         []
     );
 
-    const handleButtonClick = (row) => {
-        console.log("Button clicked for row: ", row);
-        setName(row.name);
-        setId(row.idCurrency);
+    const handleUpdate = (currency) => {
+        console.log("Button clicked for row: ", currency);
+        setName(currency.name);
+        setId(currency.idCurrency);
+    };
+
+    const toggleDeleteConfirmation = (event, currency) => {
+        console.log(showDeleteConfirmation);
+        if (!showDeleteConfirmation) {
+            event.stopPropagation();
+            setShowDeleteConfirmation(!showDeleteConfirmation);
+            return;
+        }
+        else {
+            console.log("Deleting currency: ", currency);
+            deleteCurrency(currency);
+        }
+        setShowDeleteConfirmation(false);
+    };
+
+    const deleteCurrency = (currency) => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.delete(`http://localhost:3000/currency/delete`, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            },
+            data: { idCurrency: currency.idCurrency }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
+                } else {
+                    console.error('Failed to delete currency');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting currency:', error);
+            });
     };
 
     const handleInsertClick = () => {
