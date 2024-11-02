@@ -76,7 +76,7 @@ const Currency = () => {
                 Header: "Actions",
                 Cell: ({ row }) => (
                     <>
-                        <button onClick={() => handleUpdate(row.original)} type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCurrency">
+                        <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modalCurrency">
                             Update
                         </button>
                         <button class="btn-delete" onClick={(e) => toggleDeleteConfirmation(e, row.original)}>
