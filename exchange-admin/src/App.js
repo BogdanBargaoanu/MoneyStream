@@ -16,6 +16,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<PrivateRoute component={Dashboard} />} />
           <Route path="/dashboard" element={<PrivateRoute component={Dashboard} />} />
           <Route path="/partners" element={<PrivateRoute component={Partners} />} />
           <Route path="/locations" element={<PrivateRoute component={Locations} />} />
