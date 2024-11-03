@@ -4,6 +4,7 @@ import axios from 'axios';
 import logo from '../Assets/logo.png'
 import { useTable } from 'react-table'
 import './Currency.css'
+import { useToast } from '../../Context/Toast/ToastContext';
 
 const Currency = () => {
     const [currencies, setCurrencies] = useState([]);
@@ -11,8 +12,8 @@ const Currency = () => {
     const [filteredCurrencies, setFilteredCurrencies] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
     const [name, setName] = useState('');
-    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [id, setId] = useState(null);
+    const { showToastMessage } = useToast();
 
     const fetchCurrencies = () => {
         const token = localStorage.getItem('user-token');
@@ -79,8 +80,8 @@ const Currency = () => {
                         <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modalCurrency">
                             Update
                         </button>
-                        <button class="btn-delete" onClick={(e) => toggleDeleteConfirmation(e, row.original)}>
-                            <span class="delete-message">CONFIRM DELETE</span>
+                        <button className="btn-delete">
+                            <span onClick={() => deleteCurrency(row.original)} className="delete-message">CONFIRM DELETE</span>
                             <svg className="delete-svg" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="2" >
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -95,32 +96,19 @@ const Currency = () => {
     );
 
     const handleUpdate = (currency) => {
-        console.log("Button clicked for row: ", currency);
+        console.log("Button clicked for currency: ", currency);
         setName(currency.name);
         setId(currency.idCurrency);
-    };
-
-    const toggleDeleteConfirmation = (event, currency) => {
-        console.log(showDeleteConfirmation);
-        if (!showDeleteConfirmation) {
-            event.stopPropagation();
-            setShowDeleteConfirmation(!showDeleteConfirmation);
-            return;
-        }
-        else {
-            console.log("Deleting currency: ", currency);
-            deleteCurrency(currency);
-        }
-        setShowDeleteConfirmation(false);
     };
 
     const deleteCurrency = (currency) => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
         axios.delete(`http://localhost:3000/currency/delete`, {
-            idCurrency: id
-        }, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            },
+            data: {
+                idCurrency: currency.idCurrency // Pass the idCurrency in the data field
             }
         })
             .then(response => {
@@ -136,8 +124,12 @@ const Currency = () => {
                 }
             })
             .catch(error => {
-                console.error('Error deleting currency:', error);
-            });
+                showToastMessage('Could not delete currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            })
     };
 
     const handleInsertClick = () => {
@@ -176,7 +168,11 @@ const Currency = () => {
                 }
             })
             .catch(error => {
-                console.error('Error inserting currency:', error);
+                showToastMessage('Could not insert currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
             });
     };
 
@@ -199,19 +195,18 @@ const Currency = () => {
                     setFilteredCurrencies(filteredCurrencies.map(currency =>
                         currency.idCurrency === id ? { ...currency, name: name } : currency
                     ));
-                    filter(searchValue);
                     setName('');
                     setId(null);
                 } else {
                     console.error('Failed to update currency');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
                 }
             })
             .catch(error => {
-                console.error('Error updating currency:', error);
+                showToastMessage('Could not update currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
             });
     };
 

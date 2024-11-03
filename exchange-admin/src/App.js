@@ -9,21 +9,24 @@ import Rates from './Components/Rates/Rates';
 import PrivateRoute from './PrivateRoute';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
+import { ToastProvider } from './Context/Toast/ToastContext';
 
 function App() {
   return (
     <div className="App">
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<PrivateRoute component={Dashboard} />} />
-          <Route path="/dashboard" element={<PrivateRoute component={Dashboard} />} />
-          <Route path="/partners" element={<PrivateRoute component={Partners} />} />
-          <Route path="/locations" element={<PrivateRoute component={Locations} />} />
-          <Route path="/currency" element={<PrivateRoute component={Currency} />} />
-          <Route path="/rates" element={<PrivateRoute component={Rates} />} />
-        </Routes>
-      </Router>
+      <ToastProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<PrivateRoute component={Dashboard} />} />
+            <Route path="/dashboard" element={<PrivateRoute component={Dashboard} />} />
+            <Route path="/partners" element={<PrivateRoute component={Partners} />} />
+            <Route path="/locations" element={<PrivateRoute component={Locations} />} />
+            <Route path="/currency" element={<PrivateRoute component={Currency} />} />
+            <Route path="/rates" element={<PrivateRoute component={Rates} />} />
+          </Routes>
+        </Router>
+      </ToastProvider>
     </div>
   );
 }
