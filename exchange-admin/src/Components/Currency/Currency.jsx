@@ -77,7 +77,7 @@ const Currency = () => {
                 Header: "Actions",
                 Cell: ({ row }) => (
                     <>
-                        <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modalCurrency">
+                        <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modal-currency">
                             Update
                         </button>
                         <button className="btn-delete">
@@ -258,10 +258,10 @@ const Currency = () => {
                 </table>
                 )}
             </div>
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modalCurrency">
+            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-currency">
                 Insert
             </button>
-            <div id="modalCurrency" class="modal" tabindex="-1">
+            <div id="modal-currency" class="modal" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">

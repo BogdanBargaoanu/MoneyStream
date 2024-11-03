@@ -58,3 +58,8 @@
     margin-top: 10px;
     margin-right: 10px;
 }
+
+#modal-currency {
+    animation: slide-up-fade-in 0.5s ease;
+    transition: transform 0.5s ease;
+}
