@@ -79,12 +79,12 @@ const Partners = () => {
         <div>
             <Navbar />
             <img className="logo" src={logo} alt="" />
-            <div class="input-group mb-3 search-box">
-                <div class="input-group-prepend">
+            <div className="input-group mb-3 search-box">
+                <div className="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1">@</span>
                 </div>
                 <input
-                    className='form-control'
+                    className='form-control partner-search'
                     type="text"
                     placeholder="Search by username"
                     value={searchValue}
