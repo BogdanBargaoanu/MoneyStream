@@ -11,7 +11,6 @@ const Currency = () => {
     const [filteredCurrencies, setFilteredCurrencies] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
     const [name, setName] = useState('');
-    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [id, setId] = useState(null);
 
     const fetchCurrencies = () => {
@@ -79,8 +78,8 @@ const Currency = () => {
                         <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modalCurrency">
                             Update
                         </button>
-                        <button class="btn-delete" onClick={(e) => toggleDeleteConfirmation(e, row.original)}>
-                            <span class="delete-message">CONFIRM DELETE</span>
+                        <button className="btn-delete">
+                            <span onClick={() => deleteCurrency(row.original)} className="delete-message">CONFIRM DELETE</span>
                             <svg className="delete-svg" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="2" >
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -95,32 +94,19 @@ const Currency = () => {
     );
 
     const handleUpdate = (currency) => {
-        console.log("Button clicked for row: ", currency);
+        console.log("Button clicked for currency: ", currency);
         setName(currency.name);
         setId(currency.idCurrency);
-    };
-
-    const toggleDeleteConfirmation = (event, currency) => {
-        console.log(showDeleteConfirmation);
-        if (!showDeleteConfirmation) {
-            event.stopPropagation();
-            setShowDeleteConfirmation(!showDeleteConfirmation);
-            return;
-        }
-        else {
-            console.log("Deleting currency: ", currency);
-            deleteCurrency(currency);
-        }
-        setShowDeleteConfirmation(false);
     };
 
     const deleteCurrency = (currency) => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
         axios.delete(`http://localhost:3000/currency/delete`, {
-            idCurrency: id
-        }, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            },
+            data: {
+                idCurrency: currency.idCurrency // Pass the idCurrency in the data field
             }
         })
             .then(response => {
@@ -137,7 +123,7 @@ const Currency = () => {
             })
             .catch(error => {
                 console.error('Error deleting currency:', error);
-            });
+            })
     };
 
     const handleInsertClick = () => {
@@ -199,7 +185,6 @@ const Currency = () => {
                     setFilteredCurrencies(filteredCurrencies.map(currency =>
                         currency.idCurrency === id ? { ...currency, name: name } : currency
                     ));
-                    filter(searchValue);
                     setName('');
                     setId(null);
                 } else {
