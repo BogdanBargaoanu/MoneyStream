@@ -4,6 +4,7 @@ import axios from 'axios';
 import logo from '../Assets/logo.png'
 import { useTable } from 'react-table'
 import './Currency.css'
+import { useToast } from '../../Context/Toast/ToastContext';
 
 const Currency = () => {
     const [currencies, setCurrencies] = useState([]);
@@ -12,6 +13,7 @@ const Currency = () => {
     const [searchValue, setSearchValue] = useState(null);
     const [name, setName] = useState('');
     const [id, setId] = useState(null);
+    const { showToastMessage } = useToast();
 
     const fetchCurrencies = () => {
         const token = localStorage.getItem('user-token');
@@ -122,7 +124,11 @@ const Currency = () => {
                 }
             })
             .catch(error => {
-                console.error('Error deleting currency:', error);
+                showToastMessage('Could not delete currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
             })
     };
 
@@ -162,7 +168,11 @@ const Currency = () => {
                 }
             })
             .catch(error => {
-                console.error('Error inserting currency:', error);
+                showToastMessage('Could not insert currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
             });
     };
 
@@ -189,14 +199,14 @@ const Currency = () => {
                     setId(null);
                 } else {
                     console.error('Failed to update currency');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
                 }
             })
             .catch(error => {
-                console.error('Error updating currency:', error);
+                showToastMessage('Could not update currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
             });
     };
 

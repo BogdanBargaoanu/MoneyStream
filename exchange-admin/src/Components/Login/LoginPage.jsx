@@ -5,15 +5,14 @@ import Toast from 'react-bootstrap/Toast'
 import user_icon from '../Assets/person.png'
 import password_icon from '../Assets/password.png'
 import email_icon from '../Assets/email.png'
-import logo from '../Assets/logo.png'
+import { useToast } from "../../Context/Toast/ToastContext"
 
 const LoginPage = () => {
     const [action, setAction] = useState("Login");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState("");
+    const { showToastMessage } = useToast();
 
     const handleLogin = () => {
         axios.post('http://localhost:3000/partners/login', {
@@ -28,8 +27,7 @@ const LoginPage = () => {
                 }
             })
             .catch(error => {
-                setToastMessage('Invalid login: ' + (error.response?.data?.error || 'Unknown error'));
-                setShowToast(true);
+                showToastMessage('Invalid login: ' + (error.response?.data?.error || 'Unknown error'));
             });
     };
 
@@ -45,14 +43,12 @@ const LoginPage = () => {
                     // The registration was successful
                     setUsername("");
                     setPassword("");
-                    setToastMessage('Registration successful. Please login.');
-                    setShowToast(true);
+                    showToastMessage('Registration successful. Please login.');
                     setAction("Login");
                 }
             })
             .catch(error => {
-                setToastMessage('Invalid registration: ' + (error.response?.data?.error || 'Unknown error'));
-                setShowToast(true);
+                showToastMessage('Invalid registration: ' + (error.response?.data?.error || 'Unknown error'));
             });
     };
     return (
@@ -82,14 +78,6 @@ const LoginPage = () => {
                 <div className={action === "Login" ? "submit gray" : "submit"} onClick={() => { action === "Sign Up" ? handleSignUp() : setAction("Sign Up") }}>Sign-up</div>
                 <div className={action === "Sign Up" ? "submit gray" : "submit"} onClick={() => { action === "Login" ? handleLogin() : setAction("Login") }}>Login</div>
             </div>
-            <Toast position="top-end" className="p-3" style={{ position: 'absolute', top: 5, right: 5 }} onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
-                <Toast.Header>
-                    <img src={logo} className="rounded me-2" alt="" height="20px" width="20px" />
-                    <strong className="me-auto">Exchange-Admin</strong>
-                    <small>Now</small>
-                </Toast.Header>
-                <Toast.Body>{toastMessage}</Toast.Body>
-            </Toast>
         </div>)
 }
 
