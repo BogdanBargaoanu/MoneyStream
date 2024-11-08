@@ -9,6 +9,8 @@ const jwt = require('jsonwebtoken');
  *     tags:
  *      - currency
  *     description: Gets the list of currencies.
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Returns the currencies.
@@ -76,6 +78,8 @@ router.get('/', function (req, res, next) {
  *     tags:
  *      - currency
  *     description: Add a currency.
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -202,6 +206,8 @@ router.post('/insert', function (req, res, next) {
  *     tags:
  *      - currency
  *     description: Update a currency.
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -331,6 +337,8 @@ router.put('/update', function (req, res, next) {
  *     tags:
  *      - currency
  *     description: Delete a currency.
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

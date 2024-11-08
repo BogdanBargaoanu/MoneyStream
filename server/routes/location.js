@@ -4,11 +4,13 @@ const jwt = require('jsonwebtoken');
 
 /**
  * @openapi
- * /locations:
+ * /location:
  *   get:
  *     tags:
- *      - locations
+ *      - location
  *     description: Gets the list of locations.
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Returns the locations.
@@ -81,11 +83,13 @@ router.get('/', function (req, res, next) {
 
 /**
  * @openapi
- * /locations/{idPartner}:
+ * /location/{idPartner}:
  *   get:
  *     tags:
- *      - locations
+ *      - location
  *     description: Gets the list of locations for a specific partner.
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - name: idPartner
  *         in: path
@@ -160,6 +164,140 @@ router.get('/:idPartner', function (req, res, next) {
         return;
       }
       res.json({ result, success: true });
+    });
+  });
+
+/**
+ * @openapi
+ * /location/insert:
+ *   post:
+ *     tags:
+ *      - location
+ *     description: Add a location.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               address:
+ *                 type: string
+ *                 description: The address of the location.
+ *               latitude:
+ *                 type: number
+ *                 format: double
+ *                 description: The latitude of the location.
+ *               longitude:
+ *                 type: number
+ *                 format: double
+ *                 description: The longitude of the location.
+ *               information:
+ *                 type: string
+ *                 description: Additional information about the location.
+ *     responses:
+ *       200:
+ *         description: Location added successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ *       400:
+ *         description: Error caused by an inappropriate input.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+router.post('/insert', function (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      res.status(401).json({ error: 'No authorization header', success: false });
+      return;
+    }
+  
+    const token = authHeader.split(' ')[1]; // get the token from the Authorization header
+    let userId;
+    try {
+      const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+      userId = decoded.id; // get the partner ID from the decoded token
+    } catch (err) {
+      res.status(401).json({ error: 'Invalid token', success: false });
+      return;
+    }
+  
+    //const { address, latitude, longitude, information } = req.body;
+    const insertQuery = 'INSERT INTO location (idPartner, address, latitude, longitude, information) VALUES (?, ?, ?, ?, ?)';
+    const checkLocation = 'SELECT COUNT(idLocation) AS count FROM location WHERE address = ?';
+  
+    console.log(req.body);
+    if (!req.body.address || !req.body.latitude || !req.body.longitude || !req.body.information) {
+      res.status(400).json({ error: 'The request has missing information!', success: false });
+      return;
+    }
+  
+    req.db.beginTransaction((err) => {
+      if (err) {
+        res.status(500).json({ error: err.message, success: false });
+        return;
+      }
+  
+      req.db.query(checkLocation, [req.body.address], (err, result) => {
+        if (err) {
+          res.status(500).json({ error: err.message, success: false });
+          return;
+        }
+        if (result[0]['count'] > 0) {
+          res.status(400).json({ error: 'The location already exists!', success: false });
+          return;
+        }
+  
+        req.db.query(insertQuery, [userId, req.body.address, req.body.latitude, req.body.longitude, req.body.information], (err, result) => {
+          if (err) {
+            res.status(500).json({ error: err.message, success: false });
+            return;
+          }
+  
+          req.db.commit((err) => {
+            if (err) {
+              return req.db.rollback(() => {
+                res.status(500).json({ error: err.message, success: false });
+              });
+            }
+            res.json({ message: 'Location added successfully!', success: true });
+          });
+        });
+      });
     });
   });
 
