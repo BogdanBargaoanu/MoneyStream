@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var partnersRouter = require('./routes/partners');
 var currencyRouter = require('./routes/currency');
+var locationsRouter = require('./routes/location');
 
 var app = express();
 
@@ -171,6 +172,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/partners', partnersRouter);
 app.use('/currency', currencyRouter);
+app.use('/location', locationsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

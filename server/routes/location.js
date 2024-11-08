@@ -4,27 +4,37 @@ const jwt = require('jsonwebtoken');
 
 /**
  * @openapi
- * /currency:
+ * /location:
  *   get:
  *     tags:
- *      - currency
- *     description: Gets the list of currencies.
+ *      - location
+ *     description: Gets the list of locations.
  *     security:
  *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: Returns the currencies.
+ *         description: Returns the locations.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 idCurrency:
+ *                 idLocation:
  *                   type: integer
- *                 name:
- *                  type: string
+ *                 idPartner:
+ *                   type: integer
+ *                 address:
+ *                   type: string
+ *                 latitude:
+ *                   type: number
+ *                   format: double
+ *                 longitude:
+ *                   type: number
+ *                   format: double
+ *                 information:
+ *                   type: string
  *                 success:
- *                  type: boolean
+ *                   type: boolean
  *       500:
  *         description: Internal server error.
  *         content:
@@ -61,7 +71,7 @@ router.get('/', function (req, res, next) {
     return;
   }
 
-  const query = `SELECT * FROM currency`;
+  const query = `SELECT * FROM location`;
   req.db.query(query, (err, result) => {
     if (err) {
       res.status(500).json({ error: err.message, success: false });
@@ -73,11 +83,97 @@ router.get('/', function (req, res, next) {
 
 /**
  * @openapi
- * /currency/insert:
+ * /location/{idPartner}:
+ *   get:
+ *     tags:
+ *      - location
+ *     description: Gets the list of locations for a specific partner.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: idPartner
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Returns the locations.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 idLocation:
+ *                   type: integer
+ *                 idPartner:
+ *                   type: integer
+ *                 address:
+ *                   type: string
+ *                 latitude:
+ *                   type: number
+ *                   format: double
+ *                 longitude:
+ *                   type: number
+ *                   format: double
+ *                 information:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+router.get('/:idPartner', function (req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).json({ error: 'No authorization header', success: false });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1]; // get the token from the Authorization header
+  let userId;
+  try {
+    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    userId = decoded.id; // get the partner ID from the decoded token
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token', success: false });
+    return;
+  }
+
+  const idPartner = req.params.idPartner; // get the idPartner from the URL
+  const query = `SELECT * FROM location WHERE idPartner = ?`;
+  req.db.query(query, [idPartner], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: err.message, success: false });
+      return;
+    }
+    res.json({ result, success: true });
+  });
+});
+
+/**
+ * @openapi
+ * /location/insert:
  *   post:
  *     tags:
- *      - currency
- *     description: Add a currency.
+ *      - location
+ *     description: Add a location.
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -87,12 +183,23 @@ router.get('/', function (req, res, next) {
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               address:
  *                 type: string
- *                 description: The name of the entity.
+ *                 description: The address of the location.
+ *               latitude:
+ *                 type: number
+ *                 format: double
+ *                 description: The latitude of the location.
+ *               longitude:
+ *                 type: number
+ *                 format: double
+ *                 description: The longitude of the location.
+ *               information:
+ *                 type: string
+ *                 description: Additional information about the location.
  *     responses:
  *       200:
- *         description: Currency added successfully.
+ *         description: Location added successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -130,7 +237,7 @@ router.get('/', function (req, res, next) {
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
- * */
+ */
 
 router.post('/insert', function (req, res, next) {
   const authHeader = req.headers.authorization;
@@ -149,38 +256,33 @@ router.post('/insert', function (req, res, next) {
     return;
   }
 
-  const insertQuery = 'INSERT INTO currency (name) VALUES (?)';
-  const checkName = 'SELECT COUNT(idCurrency) AS count FROM currency WHERE name = ?';
-  if (!req.body.name) {
-    res.status(400).json({ error: 'The request has missing information!' });
-    return;
-  }
-  if (req.body.name.length < 2) {
-    res.status(400).json({ error: 'The name must have at least 2 characters!' });
-    return;
-  }
-  if (req.body.name.length > 50) {
-    res.status(400).json({ error: 'The name must have at most 50 characters!' });
-    return;
-  }
-  req.db.beginTransaction((err) => {
+  const { address, latitude, longitude, information } = req.body;
+  const insertQuery = 'INSERT INTO location (idPartner, address, latitude, longitude, information) VALUES (?, ?, ?, ?, ?)';
+  const checkLocation = 'SELECT COUNT(idLocation) AS count FROM location WHERE address = ?';
 
+  console.log(req.body);
+  if (!address || !latitude || !longitude || !information) {
+    res.status(400).json({ error: 'The request has missing information!', success: false });
+    return;
+  }
+
+  req.db.beginTransaction((err) => {
     if (err) {
       res.status(500).json({ error: err.message, success: false });
       return;
     }
 
-    req.db.query(checkName, [req.body.name], (err, result) => {
+    req.db.query(checkLocation, [address], (err, result) => {
       if (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message, success: false });
         return;
       }
       if (result[0]['count'] > 0) {
-        res.status(400).json({ error: 'The currency already exists!', success: false });
+        res.status(400).json({ error: 'The location already exists!', success: false });
         return;
       }
 
-      req.db.query(insertQuery, [req.body.name, req.body.isUser], (err, result) => {
+      req.db.query(insertQuery, [userId, address, latitude, longitude, information], (err, result) => {
         if (err) {
           res.status(500).json({ error: err.message, success: false });
           return;
@@ -192,7 +294,7 @@ router.post('/insert', function (req, res, next) {
               res.status(500).json({ error: err.message, success: false });
             });
           }
-          res.json({ message: 'Currency added successfully!', success: true });
+          res.json({ message: 'Location added successfully!', success: true });
         });
       });
     });
@@ -200,68 +302,79 @@ router.post('/insert', function (req, res, next) {
 });
 
 /**
- * @openapi
- * /currency/update:
- *   put:
- *     tags:
- *      - currency
- *     description: Update a currency.
- *     security:
- *       - BearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               idCurrency:
- *                 type: integer
- *                 description: The ID of the currency.
- *               name:
- *                 type: string
- *                 description: The name of the currency.
- *     responses:
- *       200:
- *         description: Currency updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 success:
- *                   type: boolean
- *       400:
- *         description: Error caused by an inappropriate input.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                 success:
- *                   type: boolean
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                 success:
- *                   type: boolean
- * components:
- *   securitySchemes:
- *     BearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- * */
+* @openapi
+* /location/update:
+*   put:
+*     tags:
+*      - location
+*     description: Update a location.
+*     security:
+*       - BearerAuth: []
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties:
+*               idLocation:
+*                 type: integer
+*                 description: The ID of the location.
+*               address:
+*                 type: string
+*                 description: The address of the location.
+*               latitude:
+*                 type: number
+*                 format: double
+*                 description: The latitude of the location.
+*               longitude:
+*                 type: number
+*                 format: double
+*                 description: The longitude of the location.
+*               information:
+*                 type: string
+*                 description: Additional information about the location.
+*     responses:
+*       200:
+*         description: Location updated successfully.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                 success:
+*                   type: boolean
+*       400:
+*         description: Error caused by an inappropriate input.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 error:
+*                   type: string
+*                 success:
+*                   type: boolean
+*       500:
+*         description: Internal server error.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 error:
+*                   type: string
+*                 success:
+*                   type: boolean
+* components:
+*   securitySchemes:
+*     BearerAuth:
+*       type: http
+*       scheme: bearer
+*       bearerFormat: JWT
+*/
 
 router.put('/update', function (req, res, next) {
   const authHeader = req.headers.authorization;
@@ -280,38 +393,32 @@ router.put('/update', function (req, res, next) {
     return;
   }
 
-  const updateQuery = 'UPDATE currency SET name = ? WHERE idCurrency = ?';
-  const checkName = 'SELECT COUNT(idCurrency) AS count FROM currency WHERE name = ? AND idCurrency != ?';
-  if (!req.body.idCurrency || !req.body.name) {
+  const { idLocation, address, latitude, longitude, information } = req.body;
+  if (!idLocation || !address || !latitude || !longitude || !information) {
     res.status(400).json({ error: 'The request has missing information!', success: false });
     return;
   }
-  if (req.body.name.length < 2) {
-    res.status(400).json({ error: 'The name must have at least 2 characters!', success: false });
-    return;
-  }
-  if (req.body.name.length > 50) {
-    res.status(400).json({ error: 'The name must have at most 50 characters!', success: false });
-    return;
-  }
-  req.db.beginTransaction((err) => {
 
+  const updateQuery = 'UPDATE location SET address = ?, latitude = ?, longitude = ?, information = ? WHERE idLocation = ?';
+  const checkLocation = 'SELECT COUNT(idLocation) AS count FROM location WHERE idPartner = ? AND address = ? AND idLocation != ?';
+
+  req.db.beginTransaction((err) => {
     if (err) {
       res.status(500).json({ error: err.message, success: false });
       return;
     }
 
-    req.db.query(checkName, [req.body.name, req.body.idCurrency], (err, result) => {
+    req.db.query(checkLocation, [userId, address, idLocation], (err, result) => {
       if (err) {
         res.status(500).json({ error: err.message, success: false });
         return;
       }
       if (result[0]['count'] > 0) {
-        res.status(400).json({ error: 'The currency name already exists!', success: false });
+        res.status(400).json({ error: 'The location already exists!', success: false });
         return;
       }
 
-      req.db.query(updateQuery, [req.body.name, req.body.idCurrency], (err, result) => {
+      req.db.query(updateQuery, [address, latitude, longitude, information, idLocation, userId], (err, result) => {
         if (err) {
           res.status(500).json({ error: err.message, success: false });
           return;
@@ -323,7 +430,7 @@ router.put('/update', function (req, res, next) {
               res.status(500).json({ error: err.message, success: false });
             });
           }
-          res.json({ message: 'Currency updated successfully!', success: true });
+          res.json({ message: 'Location updated successfully!', success: true });
         });
       });
     });
@@ -332,11 +439,11 @@ router.put('/update', function (req, res, next) {
 
 /**
  * @openapi
- * /currency/delete:
+ * /location/delete:
  *   delete:
  *     tags:
- *      - currency
- *     description: Delete a currency.
+ *      - location
+ *     description: Delete a location.
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -346,12 +453,12 @@ router.put('/update', function (req, res, next) {
  *           schema:
  *             type: object
  *             properties:
- *               idCurrency:
+ *               idLocation:
  *                 type: integer
- *                 description: The ID of the currency to delete.
+ *                 description: The ID of the location to delete.
  *     responses:
  *       200:
- *         description: Currency deleted successfully.
+ *         description: Location deleted successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -389,7 +496,7 @@ router.put('/update', function (req, res, next) {
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
- * */
+ */
 
 router.delete('/delete', function (req, res, next) {
   const authHeader = req.headers.authorization;
@@ -408,8 +515,9 @@ router.delete('/delete', function (req, res, next) {
     return;
   }
 
-  const deleteQuery = 'DELETE FROM currency WHERE idCurrency = ?';
-  if (!req.body.idCurrency) {
+  const idLocation = req.body.idLocation;
+  const deleteQuery = 'DELETE FROM location WHERE idLocation = ?';
+  if (!idLocation) {
     res.status(400).json({ error: 'The request has missing information!', success: false });
     return;
   }
@@ -420,7 +528,7 @@ router.delete('/delete', function (req, res, next) {
       return;
     }
 
-    req.db.query(deleteQuery, [req.body.idCurrency], (err, result) => {
+    req.db.query(deleteQuery, [idLocation], (err, result) => {
       if (err) {
         res.status(500).json({ error: err.message, success: false });
         return;
@@ -432,7 +540,7 @@ router.delete('/delete', function (req, res, next) {
             res.status(500).json({ error: err.message, success: false });
           });
         }
-        res.json({ message: 'Currency deleted successfully!', success: true });
+        res.json({ message: 'Location deleted successfully!', success: true });
       });
     });
   });
