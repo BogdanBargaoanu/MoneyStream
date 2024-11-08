@@ -437,4 +437,113 @@ router.put('/update', function (req, res, next) {
   });
 });
 
+/**
+ * @openapi
+ * /location/delete:
+ *   delete:
+ *     tags:
+ *      - location
+ *     description: Delete a location.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               idLocation:
+ *                 type: integer
+ *                 description: The ID of the location to delete.
+ *     responses:
+ *       200:
+ *         description: Location deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ *       400:
+ *         description: Error caused by an inappropriate input.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+router.delete('/delete', function (req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).json({ error: 'No authorization header', success: false });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1]; // get the token from the Authorization header
+  let userId;
+  try {
+    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    userId = decoded.id; // get the partner ID from the decoded token
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token', success: false });
+    return;
+  }
+
+  const idLocation = req.body.idLocation;
+  const deleteQuery = 'DELETE FROM location WHERE idLocation = ?';
+  if (!idLocation) {
+    res.status(400).json({ error: 'The request has missing information!', success: false });
+    return;
+  }
+
+  req.db.beginTransaction((err) => {
+    if (err) {
+      res.status(500).json({ error: err.message, success: false });
+      return;
+    }
+
+    req.db.query(deleteQuery, [idLocation], (err, result) => {
+      if (err) {
+        res.status(500).json({ error: err.message, success: false });
+        return;
+      }
+
+      req.db.commit((err) => {
+        if (err) {
+          return req.db.rollback(() => {
+            res.status(500).json({ error: err.message, success: false });
+          });
+        }
+        res.json({ message: 'Location deleted successfully!', success: true });
+      });
+    });
+  });
+});
+
 module.exports = router;
