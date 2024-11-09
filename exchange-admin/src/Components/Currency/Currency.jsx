@@ -29,8 +29,8 @@ const Currency = () => {
                     setFilteredCurrencies(response.data.result);
                 }
                 else {
-                    console.error('Failed to fetch partners');
-                    if (response.data.error === 'No authorization header') {
+                    console.error('Failed to fetch currencies');
+                    if (response?.data?.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
                     }
@@ -39,6 +39,10 @@ const Currency = () => {
             })
             .catch(error => {
                 console.error(error);
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
             });
     };
     useEffect(() => {
