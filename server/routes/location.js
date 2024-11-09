@@ -90,12 +90,6 @@ router.get('/', function (req, res, next) {
  *     description: Gets the list of locations for a specific partner.
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - name: idPartner
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
  *     responses:
  *       200:
  *         description: Returns the locations.
@@ -108,6 +102,8 @@ router.get('/', function (req, res, next) {
  *                   type: integer
  *                 idPartner:
  *                   type: integer
+ *                 username:
+ *                   type: string
  *                 address:
  *                   type: string
  *                 latitude:
@@ -157,7 +153,10 @@ router.get('/partner', function (req, res, next) {
   }
 
   const idPartner = userId;
-  const query = `SELECT * FROM location WHERE idPartner = ?`;
+  const query = `SELECT location.idLocation, location.idPartner, partner.username, location.latitude, location.longitude, location.address, location.information
+                FROM location
+                INNER JOIN partner ON location.idPartner = partner.idPartner
+                WHERE location.idPartner = ?`;
   req.db.query(query, [idPartner], (err, result) => {
     if (err) {
       res.status(500).json({ error: err.message, success: false });
