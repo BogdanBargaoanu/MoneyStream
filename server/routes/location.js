@@ -83,7 +83,7 @@ router.get('/', function (req, res, next) {
 
 /**
  * @openapi
- * /location/{idPartner}:
+ * /location/partner:
  *   get:
  *     tags:
  *      - location
@@ -139,7 +139,7 @@ router.get('/', function (req, res, next) {
  *       bearerFormat: JWT
  */
 
-router.get('/:idPartner', function (req, res, next) {
+router.get('/partner', function (req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     res.status(401).json({ error: 'No authorization header', success: false });
@@ -156,7 +156,7 @@ router.get('/:idPartner', function (req, res, next) {
     return;
   }
 
-  const idPartner = req.params.idPartner; // get the idPartner from the URL
+  const idPartner = userId;
   const query = `SELECT * FROM location WHERE idPartner = ?`;
   req.db.query(query, [idPartner], (err, result) => {
     if (err) {
