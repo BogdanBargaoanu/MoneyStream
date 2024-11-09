@@ -261,6 +261,7 @@ const Locations = () => {
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude
                     });
+
                 },
                 (error) => {
                     console.error('Error getting current location:', error);
@@ -270,9 +271,17 @@ const Locations = () => {
             console.error('Geolocation is not supported by this browser.');
         }
     };
-    const generateMapUrl = (address) => {
+
+    const generateMapUrlFromAddress = (address) => {
         if (address) {
             return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}&zoom=10&maptype=roadmap`;
+        }
+        return '';
+    };
+
+    var generateMapUrl = (latitude, longitude) => {
+        if (latitude && longitude) {
+            return `https://maps.google.com/maps?q=${encodeURIComponent(latitude)},${encodeURIComponent(longitude)}&hl=es;z=14&amp;&zoom=10&maptype=roadmap`;
         }
         return '';
     };
@@ -372,7 +381,7 @@ const Locations = () => {
                                     height="300px"
                                     loading="lazy"
                                     allowFullScreen
-                                    src={generateMapUrl(currentLocation.address)}
+                                    src={ generateMapUrlFromAddress(currentLocation.address) }
                                 ></iframe>
                             </div>
                         </div>
