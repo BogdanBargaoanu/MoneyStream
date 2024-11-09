@@ -35,7 +35,7 @@ const Locations = () => {
                 }
                 else {
                     console.error('Failed to fetch locations');
-                    if (error.response?.data?.error === 'No authorization header') {
+                    if (response?.data?.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
                     }
@@ -67,11 +67,11 @@ const Locations = () => {
                 location.address && location.address.toLowerCase().includes(value.toLowerCase())));
         }
         else {
-            setFilteredlocations(locations);
+            setFilteredLocations(locations);
         }
     };
 
-    var data = React.useMemo(() => filteredlocations, [filteredlocations]);
+    var data = React.useMemo(() => filteredLocations, [filteredLocations]);
     const columns = React.useMemo(
         () => [
             {
@@ -134,7 +134,7 @@ const Locations = () => {
             .then(response => {
                 if (response.data.success) {
                     setLocations(locations.filter(l => l.idLocation !== location.idLocation));
-                    setFilteredLocations(filteredlocations.filter(l => l.idLocation !== location.idLocation));
+                    setFilteredLocations(filteredLocations.filter(l => l.idLocation !== location.idLocation));
                 } else {
                     console.error('Failed to delete location');
                     if (response.data.error === 'No authorization header') {
@@ -153,6 +153,10 @@ const Locations = () => {
     };
 
     const handleInsertClick = () => {
+        resetLocation();
+    };
+
+    const resetLocation = () => {
         setCurrentLocation({
             idLocation: null,
             address: '',
@@ -165,7 +169,10 @@ const Locations = () => {
     const insertLocation = () => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
         axios.post(`http://localhost:3000/location/insert`, {
-            name: name
+            address: currentLocation.address,
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            information: currentLocation.information
         }, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
@@ -186,13 +193,7 @@ const Locations = () => {
                     });*/
                     fetchLocations();
                     filter(searchValue);
-                    setCurrentLocation({
-                        idLocation: null,
-                        address: '',
-                        latitude: null,
-                        longitude: null,
-                        information: ''
-                    });
+                    resetLocation();
                 } else {
                     console.error('Failed to insert location');
                     if (response.data.error === 'No authorization header') {
@@ -210,12 +211,11 @@ const Locations = () => {
             });
     };
 
-    const updateCurrency = () => {
-        console.log("Updating currency with id: ", id);
+    const updateLocation = () => {
+        console.log("Updating location with id: ", currentLocation.idLocation);
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.put(`http://localhost:3000/currency/update`, {
-            idCurrency: id,
-            name: name
+        axios.put(`http://localhost:3000/location/update`, {
+            currentLocation
         }, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
@@ -223,20 +223,24 @@ const Locations = () => {
         })
             .then(response => {
                 if (response.data.success) {
-                    setlocations(locations.map(currency =>
-                        currency.idCurrency === id ? { ...currency, name: name } : currency
+                    setLocations(locations.map(location =>
+                        location.idLocation === currentLocation.idLocation ? {
+                            ...location, address: currentLocation.address
+                            , latitude: currentLocation.latitude, longitude: currentLocation.longitude, information: currentLocation.information
+                        } : location
                     ));
-                    setFilteredlocations(filteredlocations.map(currency =>
-                        currency.idCurrency === id ? { ...currency, name: name } : currency
+                    setFilteredLocations(filteredLocations.map(location =>
+                        location.idLocation === currentLocation.idLocation ? {
+                            ...location, address: currentLocation.address
+                            , latitude: currentLocation.latitude, longitude: currentLocation.longitude, information: currentLocation.information
+                        } : location
                     ));
-                    setName('');
-                    setId(null);
                 } else {
-                    console.error('Failed to update currency');
+                    console.error('Failed to update location');
                 }
             })
             .catch(error => {
-                showToastMessage('Could not update currency: ' + (error.response?.data?.error || 'Unknown error'));
+                showToastMessage('Could not update location: ' + (error.response?.data?.error || 'Unknown error'));
                 if (error.response?.data?.error === 'No authorization header') {
                     localStorage.removeItem('user-token');
                     window.location.href = '/dashboard';
@@ -305,14 +309,14 @@ const Locations = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Enter currency name"
+                                value={currentLocation.address}
+                                onChange={(e) => setCurrentLocation({ ...currentLocation, address: e.target.value })}
+                                placeholder="Enter location address"
                             />
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onClick={() => id === null ? insertLocation() : updateLocation()}>Save changes</button>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onClick={() => currentLocation.idLocation === null ? insertLocation() : updateLocation()}>Save changes</button>
                         </div>
                     </div>
                 </div>

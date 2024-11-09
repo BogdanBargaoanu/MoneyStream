@@ -30,7 +30,7 @@ const Currency = () => {
                 }
                 else {
                     console.error('Failed to fetch currencies');
-                    if (error.response?.data?.error === 'No authorization header') {
+                    if (response?.data?.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
                     }
