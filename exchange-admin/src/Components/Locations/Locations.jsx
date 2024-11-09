@@ -98,7 +98,7 @@ const Locations = () => {
                 Header: "Actions",
                 Cell: ({ row }) => (
                     <>
-                        <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modal-currency">
+                        <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modal-location">
                             Update
                         </button>
                         <button className="btn-delete">
@@ -215,7 +215,11 @@ const Locations = () => {
         console.log("Updating location with id: ", currentLocation.idLocation);
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
         axios.put(`http://localhost:3000/location/update`, {
-            currentLocation
+            idLocation: currentLocation.idLocation,
+            address: currentLocation.address,
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            information: currentLocation.information
         }, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
@@ -295,23 +299,44 @@ const Locations = () => {
                 </table>
                 )}
             </div>
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-currency">
+            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-location">
                 Insert
             </button>
-            <div id="modal-currency" class="modal" tabindex="-1">
+            <div id="modal-location" class="modal" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Currency</h5>
+                            <h5 class="modal-title">Location</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <input
                                 type="text"
-                                className="form-control"
+                                className="form-control location-input"
                                 value={currentLocation.address}
                                 onChange={(e) => setCurrentLocation({ ...currentLocation, address: e.target.value })}
-                                placeholder="Enter location address"
+                                placeholder="Enter address"
+                            />
+                            <input
+                                type="number"
+                                className="form-control location-input"
+                                value={currentLocation.latitude !== null ? currentLocation.latitude : ''}
+                                onChange={(e) => setCurrentLocation({ ...currentLocation, latitude: e.target.value })}
+                                placeholder="Enter latitude"
+                            />
+                            <input
+                                type="number"
+                                className="form-control location-input"
+                                value={currentLocation.longitude !== null ? currentLocation.longitude : ''}
+                                onChange={(e) => setCurrentLocation({ ...currentLocation, longitude: e.target.value })}
+                                placeholder="Enter longitude"
+                            />
+                            <input
+                                type="text"
+                                className="form-control location-input"
+                                value={currentLocation.information}
+                                onChange={(e) => setCurrentLocation({ ...currentLocation, information: e.target.value })}
+                                placeholder="Enter information"
                             />
                         </div>
                         <div class="modal-footer">
