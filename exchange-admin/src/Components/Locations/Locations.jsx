@@ -11,8 +11,13 @@ const Locations = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [filteredLocations, setFilteredLocations] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
-    //const [name, setName] = useState('');
-    const [id, setId] = useState(null);
+    const [currentLocation, setCurrentLocation] = useState({
+        idLocation: null,
+        address: '',
+        latitude: null,
+        longitude: null,
+        information: ''
+    });
     const { showToastMessage } = useToast();
 
     const fetchLocations = () => {
@@ -74,8 +79,20 @@ const Locations = () => {
                 accessor: "idLocation",
             },
             {
-                Header: "Name",
-                accessor: "name",
+                Header: "Address",
+                accessor: "address",
+            },
+            {
+                Header: "Latitude",
+                accessor: "latitude",
+            },
+            {
+                Header: "Longitude",
+                accessor: "longitude",
+            },
+            {
+                Header: "Information",
+                accessor: "information",
             },
             {
                 Header: "Actions",
@@ -85,7 +102,7 @@ const Locations = () => {
                             Update
                         </button>
                         <button className="btn-delete">
-                            <span onClick={() => deleteCurrency(row.original)} className="delete-message">CONFIRM DELETE</span>
+                            <span onClick={() => deleteLocation(row.original)} className="delete-message">CONFIRM DELETE</span>
                             <svg className="delete-svg" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="2" >
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -101,11 +118,10 @@ const Locations = () => {
 
     const handleUpdate = (location) => {
         console.log("Button clicked for location: ", location);
-        //setName(location.address);
-        //setId(location.idCurrency);
+        setCurrentLocation(location);
     };
 
-    const deleteCurrency = (location) => {
+    const deleteLocation = (location) => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
         axios.delete(`http://localhost:3000/location/delete`, {
             headers: {
@@ -117,8 +133,8 @@ const Locations = () => {
         })
             .then(response => {
                 if (response.data.success) {
-                    setlocations(locations.filter(l => l.idLocation !== location.idLocation));
-                    setFilteredlocations(filteredlocations.filter(l => l.idLocation !== location.idLocation));
+                    setLocations(locations.filter(l => l.idLocation !== location.idLocation));
+                    setFilteredLocations(filteredlocations.filter(l => l.idLocation !== location.idLocation));
                 } else {
                     console.error('Failed to delete location');
                     if (response.data.error === 'No authorization header') {
@@ -137,13 +153,18 @@ const Locations = () => {
     };
 
     const handleInsertClick = () => {
-        setName('');
-        setId(null);
+        setCurrentLocation({
+            idLocation: null,
+            address: '',
+            latitude: null,
+            longitude: null,
+            information: ''
+        });
     };
 
-    const insertCurrency = () => {
+    const insertLocation = () => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.post(`http://localhost:3000/currency/insert`, {
+        axios.post(`http://localhost:3000/location/insert`, {
             name: name
         }, {
             headers: {
@@ -152,19 +173,28 @@ const Locations = () => {
         })
             .then(response => {
                 if (response.data.success) {
-                    /*// Assuming the response contains the new currency data
-                    const newCurrency = response.data.currency;
-                    setlocations([...locations, newCurrency]);
-                    setFilteredlocations([...filteredlocations, newCurrency]);
-                    setName('');
-                    setId(null);
-                    */
-                    fetchlocations();
+                    /*// Assuming the response contains the new location data
+                    const newLocation = response.data.location;
+                    setLocations([...locations, newLocation]);
+                    setFilteredLocations([...filteredlocations, newLocation]);
+                    setLocation({
+                        idLocation: null,
+                        address: '',
+                        latitude: null,
+                        longitude: null,
+                        information: ''
+                    });*/
+                    fetchLocations();
                     filter(searchValue);
-                    setName('');
-                    setId(null);
+                    setCurrentLocation({
+                        idLocation: null,
+                        address: '',
+                        latitude: null,
+                        longitude: null,
+                        information: ''
+                    });
                 } else {
-                    console.error('Failed to insert currency');
+                    console.error('Failed to insert location');
                     if (response.data.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
@@ -172,7 +202,7 @@ const Locations = () => {
                 }
             })
             .catch(error => {
-                showToastMessage('Could not insert currency: ' + (error.response?.data?.error || 'Unknown error'));
+                showToastMessage('Could not insert location: ' + (error.response?.data?.error || 'Unknown error'));
                 if (error.response?.data?.error === 'No authorization header') {
                     localStorage.removeItem('user-token');
                     window.location.href = '/dashboard';
