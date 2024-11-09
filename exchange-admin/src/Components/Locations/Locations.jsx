@@ -252,6 +252,25 @@ const Locations = () => {
             });
     };
 
+    const getCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setCurrentLocation({
+                        ...currentLocation,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.error('Error getting current location:', error);
+                }
+            );
+        } else {
+            console.error('Geolocation is not supported by this browser.');
+        }
+    };
+
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({ columns, data });
     return (
@@ -338,6 +357,9 @@ const Locations = () => {
                                 onChange={(e) => setCurrentLocation({ ...currentLocation, information: e.target.value })}
                                 placeholder="Enter information"
                             />
+                            <button onClick={() => getCurrentLocation()} type="button" class="btn btn-primary" style={{ marginTop: 10 }}>
+                                Get current location
+                            </button>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
