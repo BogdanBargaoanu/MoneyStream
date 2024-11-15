@@ -174,14 +174,14 @@ router.post('/insert', function (req, res, next) {
     }
 
     const { idLocation, idCurrency, date, value } = req.body;
-    const insertQuery = 'INSERT INTO rate (idLocation, idCurrency, date, value) VALUES (?, ?, ?, ?)';
-
     console.log(req.body);
     if (!idLocation || !idCurrency || !date || !value) {
         res.status(400).json({ error: 'The request has missing information!', success: false });
         return;
     }
     const formattedDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
+    const insertQuery = 'INSERT INTO rate (idLocation, idCurrency, date, value) VALUES (?, ?, ?, ?)';
+
     req.db.beginTransaction((err) => {
         if (err) {
             res.status(500).json({ error: err.message, success: false });
@@ -199,6 +199,127 @@ router.post('/insert', function (req, res, next) {
                     });
                 }
                 res.json({ message: 'Rate added successfully!', success: true });
+            });
+        });
+    });
+});
+
+/**
+* @openapi
+* /rate/update:
+*   put:
+*     tags:
+*      - rate
+*     description: Update a rate.
+*     security:
+*       - BearerAuth: []
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties:
+*               idRates:
+*                 type: integer
+*               idLocation:
+*                 type: integer
+*                 description: Foreign key of the location.
+*               idCurrency:
+*                 type: integer
+*                 description: Foreign key of the currency.
+*               date:
+*                 type: string
+*                 format: date-time
+*               value:
+*                 type: number
+*                 format: double
+*     responses:
+*       200:
+*         description: Rate updated successfully.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                 success:
+*                   type: boolean
+*       400:
+*         description: Error caused by an inappropriate input.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 error:
+*                   type: string
+*                 success:
+*                   type: boolean
+*       500:
+*         description: Internal server error.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 error:
+*                   type: string
+*                 success:
+*                   type: boolean
+* components:
+*   securitySchemes:
+*     BearerAuth:
+*       type: http
+*       scheme: bearer
+*       bearerFormat: JWT
+*/
+
+router.put('/update', function (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.status(401).json({ error: 'No authorization header', success: false });
+        return;
+    }
+
+    const token = authHeader.split(' ')[1]; // get the token from the Authorization header
+    let userId;
+    try {
+        const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+        userId = decoded.id; // get the partner ID from the decoded token
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token', success: false });
+        return;
+    }
+
+    const { idRates, idLocation, idCurrency, date, value } = req.body;
+    console.log(req.body);
+    if (!idRates || !idLocation || !idCurrency || !date || !value) {
+        res.status(400).json({ error: 'The request has missing information!', success: false });
+        return;
+    }
+    const formattedDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
+    const updateQuery = 'UPDATE rate SET idLocation = ?, idCurrency = ?, date = ?, value = ? WHERE idRates = ?';
+
+    req.db.beginTransaction((err) => {
+        if (err) {
+            res.status(500).json({ error: err.message, success: false });
+            return;
+        }
+        req.db.query(updateQuery, [idLocation, idCurrency, formattedDate, value, idRates], (err, result) => {
+            if (err) {
+                res.status(500).json({ error: err.message, success: false });
+                return;
+            }
+
+            req.db.commit((err) => {
+                if (err) {
+                    return req.db.rollback(() => {
+                        res.status(500).json({ error: err.message, success: false });
+                    });
+                }
+                res.json({ message: 'Rate updated successfully!', success: true });
             });
         });
     });
