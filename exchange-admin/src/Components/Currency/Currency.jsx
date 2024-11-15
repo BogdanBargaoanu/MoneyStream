@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../Navbar/Navbar'
 import axios from 'axios';
 import logo from '../Assets/logo.png'
 import { useTable } from 'react-table'
@@ -221,7 +220,6 @@ const Currency = () => {
 
     return (
         <div>
-            <Navbar />
             <img className="logo" src={logo} alt="" />
             <div class="input-group mb-3 search-box">
                 <div class="input-group-prepend">

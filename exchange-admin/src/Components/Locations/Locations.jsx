@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../Navbar/Navbar'
 import logo from '../Assets/logo.png'
 import './Locations.css'
 import { useTable } from 'react-table'
@@ -290,7 +289,6 @@ const Locations = () => {
         useTable({ columns, data });
     return (
         <div>
-            <Navbar />
             <img className="logo" src={logo} alt="" />
             <div class="input-group mb-3 search-box">
                 <div class="input-group-prepend">
