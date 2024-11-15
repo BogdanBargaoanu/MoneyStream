@@ -131,6 +131,7 @@ const Locations = () => {
         })
             .then(response => {
                 if (response.data.success) {
+                    showToastMessage('Successfully deleted location');
                     setLocations(locations.filter(l => l.idLocation !== location.idLocation));
                     setFilteredLocations(filteredLocations.filter(l => l.idLocation !== location.idLocation));
                 } else {
@@ -189,6 +190,7 @@ const Locations = () => {
                         longitude: null,
                         information: ''
                     });*/
+                    showToastMessage('Successfully inserted location');
                     fetchLocations();
                     filter(searchValue);
                     resetLocation();
@@ -225,6 +227,7 @@ const Locations = () => {
         })
             .then(response => {
                 if (response.data.success) {
+                    showToastMessage('Successfully updated location');
                     setLocations(locations.map(location =>
                         location.idLocation === currentLocation.idLocation ? {
                             ...location, address: currentLocation.address
