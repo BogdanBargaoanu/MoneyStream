@@ -5,10 +5,10 @@ const crypto = require('crypto');
 
 /**
  * @openapi
- * /partners:
+ * /partner:
  *   get:
  *     tags:
- *      - partners
+ *      - partner
  *     description: Gets the list of partners.
  *     responses:
  *       200:
@@ -57,10 +57,10 @@ router.get('/', function (req, res, next) {
 
 /**
  * @openapi
- * /partners/{name}:
+ * /partner/{name}:
  *   get:
  *     tags:
- *      - partners
+ *      - partner
  *     description: Gets the partner with the given partner username.
  *     parameters:
  *       - in: path
@@ -129,10 +129,10 @@ router.get('/:username', function (req, res, next) {
 
 /**
  * @openapi
- * /partners/addPartner:
+ * /partner/addPartner:
  *   post:
  *     tags:
- *      - partners
+ *      - partner
  *     description: Add an partner.
  *     requestBody:
  *       required: true
@@ -263,10 +263,10 @@ router.post('/addPartner', function (req, res, next) {
 
 /**
  * @openapi
- * /partners/login:
+ * /partner/login:
  *   post:
  *     tags:
- *      - partners
+ *      - partner
  *     description: Login a partner.
  *     requestBody:
  *       required: true

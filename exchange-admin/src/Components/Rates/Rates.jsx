@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '../Dashboard/Navbar'
+import Navbar from '../Navbar/Navbar'
 import './Rates.css'
 import logo from '../Assets/logo.png'
 

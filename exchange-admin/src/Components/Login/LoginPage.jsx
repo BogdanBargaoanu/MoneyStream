@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import axios from 'axios'
 import './LoginPage.css'
-import Toast from 'react-bootstrap/Toast'
 import user_icon from '../Assets/person.png'
 import password_icon from '../Assets/password.png'
 import email_icon from '../Assets/email.png'
@@ -15,7 +14,7 @@ const LoginPage = () => {
     const { showToastMessage } = useToast();
 
     const handleLogin = () => {
-        axios.post('http://localhost:3000/partners/login', {
+        axios.post('http://localhost:3000/partner/login', {
             username: username,
             password: password
         })
@@ -32,7 +31,7 @@ const LoginPage = () => {
     };
 
     const handleSignUp = () => {
-        axios.post('http://localhost:3000/partners/addPartner', {
+        axios.post('http://localhost:3000/partner/addPartner', {
             username: username,
             email: email,
             password: password,

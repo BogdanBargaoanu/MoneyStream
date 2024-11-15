@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../Dashboard/Navbar'
+import Navbar from '../Navbar/Navbar'
 import axios from 'axios';
 import logo from '../Assets/logo.png'
 import { useTable } from 'react-table'
@@ -80,7 +80,7 @@ const Currency = () => {
             {
                 Header: "Actions",
                 Cell: ({ row }) => (
-                    <>
+                    <div className='actions-container'>
                         <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modal-currency">
                             Update
                         </button>
@@ -92,7 +92,7 @@ const Currency = () => {
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </button>
-                    </>
+                    </div>
                 ),
             }
         ],
@@ -117,8 +117,10 @@ const Currency = () => {
         })
             .then(response => {
                 if (response.data.success) {
-                    setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
-                    setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    //setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    //setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    fetchCurrencies();
+                    filter(searchValue);
                 } else {
                     console.error('Failed to delete currency');
                     if (response.data.error === 'No authorization header') {
