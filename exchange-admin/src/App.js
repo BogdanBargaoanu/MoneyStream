@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
 import { ToastProvider } from './Context/Toast/ToastContext';
 import Navbar from './Components/Navbar/Navbar';
+import logo from './Components/Assets/logo.png';
 
 function App() {
   return (
@@ -29,7 +30,12 @@ function AppContent() {
 
   return (
     <>
-      {location.pathname !== '/login' && <Navbar />}
+      {location.pathname !== '/login' && (
+        <>
+          <Navbar />
+          <img className="logo" src={logo} alt="" />
+        </>
+      )}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<PrivateRoute component={Dashboard} />} />

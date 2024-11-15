@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import axios from 'axios';
 //import fakeData from "./MOCK_DATA.json";
-import logo from '../Assets/logo.png'
 import { useTable } from 'react-table'
 import './Partners.css'
 
@@ -76,7 +75,6 @@ const Partners = () => {
 
     return (
         <div>
-            <img className="logo" src={logo} alt="" />
             <div className="input-group mb-3 search-box">
                 <div className="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1">@</span>

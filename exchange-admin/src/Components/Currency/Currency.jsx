@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import logo from '../Assets/logo.png'
 import { useTable } from 'react-table'
 import './Currency.css'
 import { useToast } from '../../Context/Toast/ToastContext';
@@ -116,6 +115,7 @@ const Currency = () => {
         })
             .then(response => {
                 if (response.data.success) {
+                    showToastMessage('Successfully deleted currency');
                     //setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
                     //setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
                     fetchCurrencies();
@@ -160,6 +160,7 @@ const Currency = () => {
                     setName('');
                     setId(null);
                     */
+                    showToastMessage('Successfully inserted currency');
                     fetchCurrencies();
                     filter(searchValue);
                     setName('');
@@ -194,6 +195,7 @@ const Currency = () => {
         })
             .then(response => {
                 if (response.data.success) {
+                    showToastMessage('Successfully updated currency');
                     setCurrencies(currencies.map(currency =>
                         currency.idCurrency === id ? { ...currency, name: name } : currency
                     ));
@@ -220,7 +222,6 @@ const Currency = () => {
 
     return (
         <div>
-            <img className="logo" src={logo} alt="" />
             <div class="input-group mb-3 search-box">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1">@</span>
