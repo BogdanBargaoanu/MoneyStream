@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from 'react';
-import Navbar from '../Navbar/Navbar'
 import axios from 'axios';
 //import fakeData from "./MOCK_DATA.json";
 import logo from '../Assets/logo.png'
@@ -77,7 +76,6 @@ const Partners = () => {
 
     return (
         <div>
-            <Navbar />
             <img className="logo" src={logo} alt="" />
             <div className="input-group mb-3 search-box">
                 <div className="input-group-prepend">
