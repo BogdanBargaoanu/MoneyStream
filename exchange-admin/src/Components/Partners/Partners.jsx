@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import Navbar from '../Dashboard/Navbar'
+import Navbar from '../Navbar/Navbar'
 import axios from 'axios';
 //import fakeData from "./MOCK_DATA.json";
 import logo from '../Assets/logo.png'

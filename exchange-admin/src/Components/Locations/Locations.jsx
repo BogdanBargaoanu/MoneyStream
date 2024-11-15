@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../Dashboard/Navbar'
+import Navbar from '../Navbar/Navbar'
 import logo from '../Assets/logo.png'
 import './Locations.css'
 import { useTable } from 'react-table'
