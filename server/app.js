@@ -9,7 +9,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var partnerRouter = require('./routes/partner');
 var currencyRouter = require('./routes/currency');
-var locationsRouter = require('./routes/location');
+var locationRouter = require('./routes/location');
+var rateRouter = require('./routes/rate');
 
 var app = express();
 
@@ -172,7 +173,8 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/partner', partnerRouter);
 app.use('/currency', currencyRouter);
-app.use('/location', locationsRouter);
+app.use('/location', locationRouter);
+app.use('/rate', rateRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
