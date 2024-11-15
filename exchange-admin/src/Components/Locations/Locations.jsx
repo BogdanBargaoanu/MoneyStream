@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import logo from '../Assets/logo.png'
 import './Locations.css'
 import { useTable } from 'react-table'
 import { useToast } from '../../Context/Toast/ToastContext';
@@ -289,7 +288,6 @@ const Locations = () => {
         useTable({ columns, data });
     return (
         <div>
-            <img className="logo" src={logo} alt="" />
             <div class="input-group mb-3 search-box">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1">@</span>
