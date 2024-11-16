@@ -11,7 +11,7 @@ const Partners = () => {
     const [searchValue, setSearchValue] = React.useState(null);
 
     const fetchPartners = () => {
-        axios.get('http://localhost:3000/partners')
+        axios.get('http://localhost:3000/partner')
             .then(response => {
                 if (response.data.success) {
                     setPartners(response.data.result);
@@ -26,7 +26,7 @@ const Partners = () => {
                 console.error(error);
             });
     };
-    
+
     useEffect(() => {
         fetchPartners();
         setIsLoading(false);
