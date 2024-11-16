@@ -1,7 +1,4 @@
-:root {
-    --button-color: #7852DA;
-    --button-color-text: #060b26;
-}
+
 
 .container-main {
     display: flex;
@@ -22,6 +19,8 @@
     font-weight: 700;
     transition: transform 0.5s ease;
     margin: 1rem;
+    width: 90%;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.75);
 }
 
 .btn-main:hover {
