@@ -13,6 +13,18 @@
   }
 }
 
+@keyframes slide-up-fade-in {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
