@@ -49,7 +49,7 @@ const Locations = () => {
                 }
             });
     };
-    
+
     useEffect(() => {
         fetchLocations();
         setIsLoading(false);
@@ -134,7 +134,7 @@ const Locations = () => {
     };
 
     const handleUpdate = (location) => {
-        setIsFormValidState(true); // Reset form validity state
+        setIsFormValidState(true); // Set form validity state
         console.log("Button clicked for location: ", location);
         setCurrentLocation(location);
     };
@@ -425,7 +425,6 @@ const Locations = () => {
                                 data-bs-dismiss={isFormValidState ? "modal" : undefined}
                                 onClick={() => {
                                     if (isFormValid()) {
-                                        setIsFormValidState(true); // Set form validity state
                                         currentLocation.idLocation === null ? insertLocation() : updateLocation();
                                     } else {
                                         setIsFormValidState(false); // Set form validity state

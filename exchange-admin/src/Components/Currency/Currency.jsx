@@ -11,6 +11,7 @@ const Currency = () => {
     const [searchValue, setSearchValue] = useState(null);
     const [name, setName] = useState('');
     const [id, setId] = useState(null);
+    const [isFormValidState, setIsFormValidState] = useState(false); // State to track form validity
     const { showToastMessage } = useToast();
 
     const fetchCurrencies = () => {
@@ -45,6 +46,7 @@ const Currency = () => {
                 }
             });
     };
+
     useEffect(() => {
         fetchCurrencies();
         setIsLoading(false);
@@ -66,81 +68,8 @@ const Currency = () => {
         }
     };
 
-    var data = React.useMemo(() => filteredCurrencies, [filteredCurrencies]);
-    const columns = React.useMemo(
-        () => [
-            {
-                Header: "ID",
-                accessor: "idCurrency",
-            },
-            {
-                Header: "Name",
-                accessor: "name",
-            },
-            {
-                Header: "Actions",
-                Cell: ({ row }) => (
-                    <div className='actions-container'>
-                        <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modal-currency">
-                            Update
-                        </button>
-                        <button className="btn-delete">
-                            <span onClick={() => deleteCurrency(row.original)} className="delete-message">CONFIRM DELETE</span>
-                            <svg className="delete-svg" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2" >
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </div>
-                ),
-            }
-        ],
-        []
-    );
-
-    const handleUpdate = (currency) => {
-        console.log("Button clicked for currency: ", currency);
-        setName(currency.name);
-        setId(currency.idCurrency);
-    };
-
-    const deleteCurrency = (currency) => {
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.delete(`http://localhost:3000/currency/delete`, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            },
-            data: {
-                idCurrency: currency.idCurrency // Pass the idCurrency in the data field
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully deleted currency');
-                    //setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
-                    //setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
-                    fetchCurrencies();
-                    filter(searchValue);
-                } else {
-                    console.error('Failed to delete currency');
-                    showToastMessage('Failed to delete currency');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not delete currency: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
-            })
-    };
-
     const handleInsertClick = () => {
+        setIsFormValidState(false); // Reset form validity state
         setName('');
         setId(null);
     };
@@ -186,6 +115,13 @@ const Currency = () => {
             });
     };
 
+    const handleUpdate = (currency) => {
+        setIsFormValidState(true); // Set form validity state
+        console.log("Button clicked for currency: ", currency);
+        setName(currency.name);
+        setId(currency.idCurrency);
+    };
+
     const updateCurrency = () => {
         console.log("Updating currency with id: ", id);
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
@@ -221,6 +157,87 @@ const Currency = () => {
                 }
             });
     };
+
+    const deleteCurrency = (currency) => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.delete(`http://localhost:3000/currency/delete`, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            },
+            data: {
+                idCurrency: currency.idCurrency // Pass the idCurrency in the data field
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully deleted currency');
+                    //setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    //setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    fetchCurrencies();
+                    filter(searchValue);
+                } else {
+                    console.error('Failed to delete currency');
+                    showToastMessage('Failed to delete currency');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not delete currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            })
+    };
+
+    const isFormValid = () => {
+        if (!name) {
+            showToastMessage('Name is required');
+            return false;
+        }
+        return true;
+    };
+
+    const validate = () => {
+        setIsFormValidState(name !== '');
+    };
+
+    var data = React.useMemo(() => filteredCurrencies, [filteredCurrencies]);
+    const columns = React.useMemo(
+        () => [
+            {
+                Header: "ID",
+                accessor: "idCurrency",
+            },
+            {
+                Header: "Name",
+                accessor: "name",
+            },
+            {
+                Header: "Actions",
+                Cell: ({ row }) => (
+                    <div className='actions-container'>
+                        <button onClick={() => handleUpdate(row.original)} type="button" className="btn btn-primary btn-update" data-bs-toggle="modal" data-bs-target="#modal-currency">
+                            Update
+                        </button>
+                        <button className="btn-delete">
+                            <span onClick={() => deleteCurrency(row.original)} className="delete-message">CONFIRM DELETE</span>
+                            <svg className="delete-svg" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2" >
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                ),
+            }
+        ],
+        []
+    );
+
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({ columns, data });
@@ -283,13 +300,26 @@ const Currency = () => {
                                 type="text"
                                 className="form-control"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => { setName(e.target.value); validate(); }}
                                 placeholder="Enter currency name"
                             />
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onClick={() => id === null ? insertCurrency() : updateCurrency()}>Save changes</button>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                data-bs-dismiss={isFormValidState ? "modal" : undefined}
+                                onClick={() => {
+                                    if (isFormValid()) {
+                                        id === null ? insertCurrency() : updateCurrency();
+                                    } else {
+                                        setIsFormValidState(false); // Set form validity state
+                                    }
+                                }}
+                            >
+                                Save changes
+                            </button>
                         </div>
                     </div>
                 </div>

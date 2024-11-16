@@ -26,6 +26,7 @@ const Partners = () => {
                 console.error(error);
             });
     };
+    
     useEffect(() => {
         fetchPartners();
         setIsLoading(false);

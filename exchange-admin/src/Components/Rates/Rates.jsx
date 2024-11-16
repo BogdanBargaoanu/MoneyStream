@@ -181,7 +181,7 @@ const Rates = () => {
     };
 
     const handleUpdate = (rate) => {
-        setIsFormValidState(true);
+        setIsFormValidState(true); // Set form validity state
         console.log("Button clicked for rate: ", rate);
         const formattedDate = rate.date ? new Date(rate.date).toISOString().split('T')[0] : '';
 
@@ -427,7 +427,6 @@ const Rates = () => {
                                 data-bs-dismiss={isFormValidState ? "modal" : undefined}
                                 onClick={() => {
                                     if (isFormValid()) {
-                                        setIsFormValidState(true); // Set form validity state
                                         currentRate.idRates === null ? insertRate() : updateRate();
                                     } else {
                                         setIsFormValidState(false); // Set form validity state
