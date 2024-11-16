@@ -9,6 +9,7 @@ const Locations = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [filteredLocations, setFilteredLocations] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
+    const [isFormValidState, setIsFormValidState] = useState(false); // State to track form validity
     const [currentLocation, setCurrentLocation] = useState({
         idLocation: null,
         address: '',
@@ -48,6 +49,7 @@ const Locations = () => {
                 }
             });
     };
+
     useEffect(() => {
         fetchLocations();
         setIsLoading(false);
@@ -67,6 +69,210 @@ const Locations = () => {
         else {
             setFilteredLocations(locations);
         }
+    };
+
+    const resetLocation = () => {
+        setCurrentLocation({
+            idLocation: null,
+            address: '',
+            latitude: null,
+            longitude: null,
+            information: ''
+        });
+    };
+
+    const handleInsertClick = () => {
+        setIsFormValidState(false); // Reset form validity state
+        resetLocation();
+    };
+
+    const insertLocation = () => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.post(`http://localhost:3000/location/insert`, {
+            address: currentLocation.address,
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            information: currentLocation.information
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    /*// Assuming the response contains the new location data
+                    const newLocation = response.data.location;
+                    setLocations([...locations, newLocation]);
+                    setFilteredLocations([...filteredlocations, newLocation]);
+                    setLocation({
+                        idLocation: null,
+                        address: '',
+                        latitude: null,
+                        longitude: null,
+                        information: ''
+                    });*/
+                    showToastMessage('Successfully inserted location');
+                    fetchLocations();
+                    filter(searchValue);
+                    resetLocation();
+                } else {
+                    console.error('Failed to insert location');
+                    showToastMessage('Failed to insert location');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not insert location: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            });
+    };
+
+    const handleUpdate = (location) => {
+        setIsFormValidState(true); // Set form validity state
+        console.log("Button clicked for location: ", location);
+        setCurrentLocation(location);
+    };
+
+    const updateLocation = () => {
+        console.log("Updating location with id: ", currentLocation.idLocation);
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.put(`http://localhost:3000/location/update`, {
+            idLocation: currentLocation.idLocation,
+            address: currentLocation.address,
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            information: currentLocation.information
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully updated location');
+                    setLocations(locations.map(location =>
+                        location.idLocation === currentLocation.idLocation ? {
+                            ...location, address: currentLocation.address
+                            , latitude: currentLocation.latitude, longitude: currentLocation.longitude, information: currentLocation.information
+                        } : location
+                    ));
+                    setFilteredLocations(filteredLocations.map(location =>
+                        location.idLocation === currentLocation.idLocation ? {
+                            ...location, address: currentLocation.address
+                            , latitude: currentLocation.latitude, longitude: currentLocation.longitude, information: currentLocation.information
+                        } : location
+                    ));
+                } else {
+                    console.error('Failed to update location');
+                    showToastMessage('Failed to update location');
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not update location: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            });
+    };
+
+    const deleteLocation = (location) => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.delete(`http://localhost:3000/location/delete`, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            },
+            data: {
+                idLocation: location.idLocation // Pass the idLocation in the data field
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully deleted location');
+                    setLocations(locations.filter(l => l.idLocation !== location.idLocation));
+                    setFilteredLocations(filteredLocations.filter(l => l.idLocation !== location.idLocation));
+                } else {
+                    console.error('Failed to delete location');
+                    showToastMessage('Failed to delete location');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not delete location: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            })
+    };
+
+    const getCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setCurrentLocation({
+                        ...currentLocation,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+
+                },
+                (error) => {
+                    console.error('Error getting current location:', error);
+                    showToastMessage('Error getting current location');
+                }
+            );
+        } else {
+            console.error('Geolocation is not supported by this browser.');
+            showToastMessage('Geolocation is not supported by this browser.');
+        }
+    };
+
+    const generateMapUrlFromAddress = (address) => {
+        if (address) {
+            return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}&zoom=10&maptype=roadmap`;
+        }
+        return '';
+    };
+
+    var generateMapUrl = (latitude, longitude) => {
+        if (latitude && longitude) {
+            return `https://maps.google.com/maps?q=${encodeURIComponent(latitude)},${encodeURIComponent(longitude)}&hl=es;z=14&amp;&zoom=10&maptype=roadmap`;
+        }
+        return '';
+    };
+
+    const isFormValid = () => {
+        if (!currentLocation.address) {
+            showToastMessage('Address is required');
+            return false;
+        }
+        if (currentLocation.latitude === null) {
+            showToastMessage('Latitude is required');
+            return false;
+        }
+        if (currentLocation.longitude === null) {
+            showToastMessage('Longitude is required');
+            return false;
+        }
+        if (!currentLocation.information) {
+            showToastMessage('Information is required');
+            return false;
+        }
+        return true;
+    };
+
+    const validate = () => {
+        setIsFormValidState(currentLocation.address !== '' && currentLocation.latitude !== null && currentLocation.longitude !== null && currentLocation.information !== '');
     };
 
     var data = React.useMemo(() => filteredLocations, [filteredLocations]);
@@ -113,179 +319,6 @@ const Locations = () => {
         ],
         []
     );
-
-    const handleUpdate = (location) => {
-        console.log("Button clicked for location: ", location);
-        setCurrentLocation(location);
-    };
-
-    const deleteLocation = (location) => {
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.delete(`http://localhost:3000/location/delete`, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            },
-            data: {
-                idLocation: location.idLocation // Pass the idLocation in the data field
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully deleted location');
-                    setLocations(locations.filter(l => l.idLocation !== location.idLocation));
-                    setFilteredLocations(filteredLocations.filter(l => l.idLocation !== location.idLocation));
-                } else {
-                    console.error('Failed to delete location');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not delete location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
-            })
-    };
-
-    const handleInsertClick = () => {
-        resetLocation();
-    };
-
-    const resetLocation = () => {
-        setCurrentLocation({
-            idLocation: null,
-            address: '',
-            latitude: null,
-            longitude: null,
-            information: ''
-        });
-    };
-
-    const insertLocation = () => {
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.post(`http://localhost:3000/location/insert`, {
-            address: currentLocation.address,
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            information: currentLocation.information
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    /*// Assuming the response contains the new location data
-                    const newLocation = response.data.location;
-                    setLocations([...locations, newLocation]);
-                    setFilteredLocations([...filteredlocations, newLocation]);
-                    setLocation({
-                        idLocation: null,
-                        address: '',
-                        latitude: null,
-                        longitude: null,
-                        information: ''
-                    });*/
-                    showToastMessage('Successfully inserted location');
-                    fetchLocations();
-                    filter(searchValue);
-                    resetLocation();
-                } else {
-                    console.error('Failed to insert location');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not insert location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
-            });
-    };
-
-    const updateLocation = () => {
-        console.log("Updating location with id: ", currentLocation.idLocation);
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.put(`http://localhost:3000/location/update`, {
-            idLocation: currentLocation.idLocation,
-            address: currentLocation.address,
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            information: currentLocation.information
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully updated location');
-                    setLocations(locations.map(location =>
-                        location.idLocation === currentLocation.idLocation ? {
-                            ...location, address: currentLocation.address
-                            , latitude: currentLocation.latitude, longitude: currentLocation.longitude, information: currentLocation.information
-                        } : location
-                    ));
-                    setFilteredLocations(filteredLocations.map(location =>
-                        location.idLocation === currentLocation.idLocation ? {
-                            ...location, address: currentLocation.address
-                            , latitude: currentLocation.latitude, longitude: currentLocation.longitude, information: currentLocation.information
-                        } : location
-                    ));
-                } else {
-                    console.error('Failed to update location');
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not update location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
-            });
-    };
-
-    const getCurrentLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setCurrentLocation({
-                        ...currentLocation,
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    });
-
-                },
-                (error) => {
-                    console.error('Error getting current location:', error);
-                }
-            );
-        } else {
-            console.error('Geolocation is not supported by this browser.');
-        }
-    };
-
-    const generateMapUrlFromAddress = (address) => {
-        if (address) {
-            return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}&zoom=10&maptype=roadmap`;
-        }
-        return '';
-    };
-
-    var generateMapUrl = (latitude, longitude) => {
-        if (latitude && longitude) {
-            return `https://maps.google.com/maps?q=${encodeURIComponent(latitude)},${encodeURIComponent(longitude)}&hl=es;z=14&amp;&zoom=10&maptype=roadmap`;
-        }
-        return '';
-    };
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({ columns, data });
@@ -347,46 +380,59 @@ const Locations = () => {
                                 type="text"
                                 className="form-control location-input"
                                 value={currentLocation.address}
-                                onChange={(e) => setCurrentLocation({ ...currentLocation, address: e.target.value })}
+                                onChange={(e) => { setCurrentLocation({ ...currentLocation, address: e.target.value }); validate() }}
                                 placeholder="Enter address"
                             />
                             <input
                                 type="number"
                                 className="form-control location-input"
                                 value={currentLocation.latitude !== null ? currentLocation.latitude : ''}
-                                onChange={(e) => setCurrentLocation({ ...currentLocation, latitude: e.target.value })}
+                                onChange={(e) => { setCurrentLocation({ ...currentLocation, latitude: e.target.value }); validate() }}
                                 placeholder="Enter latitude"
                             />
                             <input
                                 type="number"
                                 className="form-control location-input"
                                 value={currentLocation.longitude !== null ? currentLocation.longitude : ''}
-                                onChange={(e) => setCurrentLocation({ ...currentLocation, longitude: e.target.value })}
+                                onChange={(e) => { setCurrentLocation({ ...currentLocation, longitude: e.target.value }); validate() }}
                                 placeholder="Enter longitude"
                             />
                             <input
                                 type="text"
                                 className="form-control location-input"
                                 value={currentLocation.information}
-                                onChange={(e) => setCurrentLocation({ ...currentLocation, information: e.target.value })}
+                                onChange={(e) => { setCurrentLocation({ ...currentLocation, information: e.target.value }); validate() }}
                                 placeholder="Enter information"
                             />
                             <button onClick={() => getCurrentLocation()} type="button" class="btn btn-primary" style={{ marginTop: 10 }}>
                                 Get current location
                             </button>
-                            <div className="mapswrapper">
+                            <div className="maps-wrapper">
                                 <iframe
                                     width="100%"
                                     height="300px"
                                     loading="lazy"
                                     allowFullScreen
-                                    src={ generateMapUrlFromAddress(currentLocation.address) }
+                                    src={generateMapUrlFromAddress(currentLocation.address)}
                                 ></iframe>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onClick={() => currentLocation.idLocation === null ? insertLocation() : updateLocation()}>Save changes</button>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                data-bs-dismiss={isFormValidState ? "modal" : undefined}
+                                onClick={() => {
+                                    if (isFormValid()) {
+                                        currentLocation.idLocation === null ? insertLocation() : updateLocation();
+                                    } else {
+                                        setIsFormValidState(false); // Set form validity state
+                                    }
+                                }}
+                            >
+                                Save changes
+                            </button>
                         </div>
                     </div>
                 </div>

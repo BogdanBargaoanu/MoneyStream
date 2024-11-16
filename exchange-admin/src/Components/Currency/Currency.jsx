@@ -11,6 +11,7 @@ const Currency = () => {
     const [searchValue, setSearchValue] = useState(null);
     const [name, setName] = useState('');
     const [id, setId] = useState(null);
+    const [isFormValidState, setIsFormValidState] = useState(false); // State to track form validity
     const { showToastMessage } = useToast();
 
     const fetchCurrencies = () => {
@@ -28,6 +29,7 @@ const Currency = () => {
                 }
                 else {
                     console.error('Failed to fetch currencies');
+                    showToastMessage('Failed to fetch currencies');
                     if (response?.data?.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
@@ -37,12 +39,14 @@ const Currency = () => {
             })
             .catch(error => {
                 console.error(error);
+                showToastMessage('Failed to fetch currencies: ' + (error.response?.data?.error || 'Unknown error'));
                 if (error.response?.data?.error === 'No authorization header') {
                     localStorage.removeItem('user-token');
                     window.location.href = '/dashboard';
                 }
             });
     };
+
     useEffect(() => {
         fetchCurrencies();
         setIsLoading(false);
@@ -62,6 +66,143 @@ const Currency = () => {
         else {
             setFilteredCurrencies(currencies);
         }
+    };
+
+    const handleInsertClick = () => {
+        setIsFormValidState(false); // Reset form validity state
+        setName('');
+        setId(null);
+    };
+
+    const insertCurrency = () => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.post(`http://localhost:3000/currency/insert`, {
+            name: name
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    /*// Assuming the response contains the new currency data
+                    const newCurrency = response.data.currency;
+                    setCurrencies([...currencies, newCurrency]);
+                    setFilteredCurrencies([...filteredCurrencies, newCurrency]);
+                    setName('');
+                    setId(null);
+                    */
+                    showToastMessage('Successfully inserted currency');
+                    fetchCurrencies();
+                    filter(searchValue);
+                    setName('');
+                    setId(null);
+                } else {
+                    console.error('Failed to insert currency');
+                    showToastMessage('Failed to insert currency');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not insert currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            });
+    };
+
+    const handleUpdate = (currency) => {
+        setIsFormValidState(true); // Set form validity state
+        console.log("Button clicked for currency: ", currency);
+        setName(currency.name);
+        setId(currency.idCurrency);
+    };
+
+    const updateCurrency = () => {
+        console.log("Updating currency with id: ", id);
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.put(`http://localhost:3000/currency/update`, {
+            idCurrency: id,
+            name: name
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully updated currency');
+                    setCurrencies(currencies.map(currency =>
+                        currency.idCurrency === id ? { ...currency, name: name } : currency
+                    ));
+                    setFilteredCurrencies(filteredCurrencies.map(currency =>
+                        currency.idCurrency === id ? { ...currency, name: name } : currency
+                    ));
+                    setName('');
+                    setId(null);
+                } else {
+                    console.error('Failed to update currency');
+                    showToastMessage('Failed to update currency');
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not update currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            });
+    };
+
+    const deleteCurrency = (currency) => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.delete(`http://localhost:3000/currency/delete`, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            },
+            data: {
+                idCurrency: currency.idCurrency // Pass the idCurrency in the data field
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully deleted currency');
+                    //setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    //setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
+                    fetchCurrencies();
+                    filter(searchValue);
+                } else {
+                    console.error('Failed to delete currency');
+                    showToastMessage('Failed to delete currency');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not delete currency: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            })
+    };
+
+    const isFormValid = () => {
+        if (!name) {
+            showToastMessage('Name is required');
+            return false;
+        }
+        return true;
+    };
+
+    const validate = () => {
+        setIsFormValidState(name !== '');
     };
 
     var data = React.useMemo(() => filteredCurrencies, [filteredCurrencies]);
@@ -97,125 +238,6 @@ const Currency = () => {
         []
     );
 
-    const handleUpdate = (currency) => {
-        console.log("Button clicked for currency: ", currency);
-        setName(currency.name);
-        setId(currency.idCurrency);
-    };
-
-    const deleteCurrency = (currency) => {
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.delete(`http://localhost:3000/currency/delete`, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            },
-            data: {
-                idCurrency: currency.idCurrency // Pass the idCurrency in the data field
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully deleted currency');
-                    //setCurrencies(currencies.filter(c => c.idCurrency !== currency.idCurrency));
-                    //setFilteredCurrencies(filteredCurrencies.filter(c => c.idCurrency !== currency.idCurrency));
-                    fetchCurrencies();
-                    filter(searchValue);
-                } else {
-                    console.error('Failed to delete currency');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not delete currency: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
-            })
-    };
-
-    const handleInsertClick = () => {
-        setName('');
-        setId(null);
-    };
-
-    const insertCurrency = () => {
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.post(`http://localhost:3000/currency/insert`, {
-            name: name
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    /*// Assuming the response contains the new currency data
-                    const newCurrency = response.data.currency;
-                    setCurrencies([...currencies, newCurrency]);
-                    setFilteredCurrencies([...filteredCurrencies, newCurrency]);
-                    setName('');
-                    setId(null);
-                    */
-                    showToastMessage('Successfully inserted currency');
-                    fetchCurrencies();
-                    filter(searchValue);
-                    setName('');
-                    setId(null);
-                } else {
-                    console.error('Failed to insert currency');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not insert currency: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
-            });
-    };
-
-    const updateCurrency = () => {
-        console.log("Updating currency with id: ", id);
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.put(`http://localhost:3000/currency/update`, {
-            idCurrency: id,
-            name: name
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully updated currency');
-                    setCurrencies(currencies.map(currency =>
-                        currency.idCurrency === id ? { ...currency, name: name } : currency
-                    ));
-                    setFilteredCurrencies(filteredCurrencies.map(currency =>
-                        currency.idCurrency === id ? { ...currency, name: name } : currency
-                    ));
-                    setName('');
-                    setId(null);
-                } else {
-                    console.error('Failed to update currency');
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not update currency: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
-            });
-    };
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({ columns, data });
@@ -278,13 +300,26 @@ const Currency = () => {
                                 type="text"
                                 className="form-control"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => { setName(e.target.value); validate(); }}
                                 placeholder="Enter currency name"
                             />
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onClick={() => id === null ? insertCurrency() : updateCurrency()}>Save changes</button>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                data-bs-dismiss={isFormValidState ? "modal" : undefined}
+                                onClick={() => {
+                                    if (isFormValid()) {
+                                        id === null ? insertCurrency() : updateCurrency();
+                                    } else {
+                                        setIsFormValidState(false); // Set form validity state
+                                    }
+                                }}
+                            >
+                                Save changes
+                            </button>
                         </div>
                     </div>
                 </div>
