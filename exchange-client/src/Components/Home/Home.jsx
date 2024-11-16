@@ -10,7 +10,7 @@ const Home = () => {
     return (
         <div className='container-main'>
             <img className='logo' src={logo} alt='logo' />
-            <h1 className='heading-main'>Exchange Monitor</h1>
+            <h1 className='heading-main'>Exchange Monitor v0.1</h1>
             <button className='btn-main'><ImLocation /> Nearest rates</button>
             <button className='btn-main'><MdOutlineVerified /> Best rates</button>
             <button className='btn-main'><PiListBulletsBold /> All rates</button>
