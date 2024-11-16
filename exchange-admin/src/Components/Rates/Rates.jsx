@@ -6,6 +6,7 @@ import axios from 'axios';
 
 const Rates = () => {
     const [rates, setRates] = useState([]);
+    const [currencies, setCurrencies] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [filteredRates, setFilteredRates] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
@@ -50,8 +51,42 @@ const Rates = () => {
                 }
             });
     };
+
+    const fetchCurrencies = () => {
+        const token = localStorage.getItem('user-token');
+        axios.get('http://localhost:3000/currency',
+            {
+                headers: {
+                    Authorization: `Bearer ${token}` // send the token in the Authorization header
+                }
+            })
+            .then(response => {
+                if (response.data.success) {
+                    setCurrencies(response.data.result);
+                }
+                else {
+                    console.error('Failed to fetch currencies');
+                    showToastMessage('Failed to fetch currencies');
+                    if (response?.data?.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+                showToastMessage('Failed to fetch currencies: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            });
+    };
+
     useEffect(() => {
         fetchRates();
+        fetchCurrencies();
         setIsLoading(false);
     }, []);
 
