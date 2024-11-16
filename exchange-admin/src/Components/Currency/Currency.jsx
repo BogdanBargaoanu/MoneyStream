@@ -28,6 +28,7 @@ const Currency = () => {
                 }
                 else {
                     console.error('Failed to fetch currencies');
+                    showToastMessage('Failed to fetch currencies');
                     if (response?.data?.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
@@ -37,6 +38,7 @@ const Currency = () => {
             })
             .catch(error => {
                 console.error(error);
+                showToastMessage('Failed to fetch currencies: ' + (error.response?.data?.error || 'Unknown error'));
                 if (error.response?.data?.error === 'No authorization header') {
                     localStorage.removeItem('user-token');
                     window.location.href = '/dashboard';
@@ -122,6 +124,7 @@ const Currency = () => {
                     filter(searchValue);
                 } else {
                     console.error('Failed to delete currency');
+                    showToastMessage('Failed to delete currency');
                     if (response.data.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
@@ -167,6 +170,7 @@ const Currency = () => {
                     setId(null);
                 } else {
                     console.error('Failed to insert currency');
+                    showToastMessage('Failed to insert currency');
                     if (response.data.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
@@ -206,6 +210,7 @@ const Currency = () => {
                     setId(null);
                 } else {
                     console.error('Failed to update currency');
+                    showToastMessage('Failed to update currency');
                 }
             })
             .catch(error => {

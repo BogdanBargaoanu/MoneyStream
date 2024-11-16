@@ -136,6 +136,7 @@ const Locations = () => {
                     setFilteredLocations(filteredLocations.filter(l => l.idLocation !== location.idLocation));
                 } else {
                     console.error('Failed to delete location');
+                    showToastMessage('Failed to delete location');
                     if (response.data.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
@@ -196,6 +197,7 @@ const Locations = () => {
                     resetLocation();
                 } else {
                     console.error('Failed to insert location');
+                    showToastMessage('Failed to insert location');
                     if (response.data.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
                         window.location.href = '/dashboard';
@@ -242,6 +244,7 @@ const Locations = () => {
                     ));
                 } else {
                     console.error('Failed to update location');
+                    showToastMessage('Failed to update location');
                 }
             })
             .catch(error => {
@@ -266,10 +269,12 @@ const Locations = () => {
                 },
                 (error) => {
                     console.error('Error getting current location:', error);
+                    showToastMessage('Error getting current location');
                 }
             );
         } else {
             console.error('Geolocation is not supported by this browser.');
+            showToastMessage('Geolocation is not supported by this browser.');
         }
     };
 
@@ -374,7 +379,7 @@ const Locations = () => {
                             <button onClick={() => getCurrentLocation()} type="button" class="btn btn-primary" style={{ marginTop: 10 }}>
                                 Get current location
                             </button>
-                            <div className="mapswrapper">
+                            <div className="maps-wrapper">
                                 <iframe
                                     width="100%"
                                     height="300px"
