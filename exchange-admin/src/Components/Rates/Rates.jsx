@@ -127,8 +127,156 @@ const Rates = () => {
         filter(value);
     };
 
-    const filter = (value) => {
+    const filter = (value) => { };
 
+    const resetRate = () => {
+        setCurrentRate({
+            idRates: null,
+            idrate: null,
+            idCurrency: null,
+            date: null,
+            value: null
+        });
+    };
+
+    const handleInsertClick = () => {
+        setIsFormValidState(false);
+        resetRate();
+    };
+
+    const insertRate = () => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.post(`http://localhost:3000/rate/insert`, {
+            idLocation: currentRate.idLocation,
+            idCurrency: currentRate.idCurrency,
+            date: currentRate.date,
+            value: currentRate.value
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully inserted rate');
+                    fetchRates();
+                    //filter(searchValue);
+                    resetRate();
+                } else {
+                    console.error('Failed to insert rate');
+                    showToastMessage('Failed to insert rate');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.rate.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not insert rate: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.rate.href = '/dashboard';
+                }
+            });
+    };
+
+    const handleUpdate = (rate) => {
+        setIsFormValidState(true);
+        console.log("Button clicked for rate: ", rate);
+        const formattedDate = rate.date ? new Date(rate.date).toISOString().split('T')[0] : '';
+
+        setCurrentRate({
+            ...rate,
+            date: formattedDate
+        });
+    };
+
+    const updateRate = () => {
+        console.log("Updating rate with id: ", currentRate.idrate);
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.put(`http://localhost:3000/rate/update`, {
+            idRates: currentRate.idRates,
+            idLocation: currentRate.idLocation,
+            idCurrency: currentRate.idCurrency,
+            date: currentRate.date,
+            value: currentRate.value
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully updated rate');
+                    fetchRates();
+                } else {
+                    console.error('Failed to update rate');
+                    showToastMessage('Failed to update rate');
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not update rate: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.rate.href = '/dashboard';
+                }
+            });
+    };
+
+    const deleteRate = (rate) => {
+        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
+        axios.delete(`http://localhost:3000/rate/delete`, {
+            headers: {
+                Authorization: `Bearer ${token}` // Send the token in the Authorization header
+            },
+            data: {
+                idRates: rate.idRates // Pass the idrate in the data field
+            }
+        })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Successfully deleted rate');
+                    fetchRates();
+                } else {
+                    console.error('Failed to delete rate');
+                    showToastMessage('Failed to delete rate');
+                    if (response.data.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.rate.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                showToastMessage('Could not delete rate: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.rate.href = '/dashboard';
+                }
+            })
+    };
+
+    const isFormValid = () => {
+        if (!currentRate.idLocation) {
+            showToastMessage('Location is required');
+            return false;
+        }
+        if (!currentRate.idCurrency) {
+            showToastMessage('Currency is required');
+            return false;
+        }
+        if (!currentRate.date) {
+            showToastMessage('Date is required');
+            return false;
+        }
+        if (currentRate.value === null) {
+            showToastMessage('Value is required');
+            return false;
+        }
+        return true;
+    };
+
+    const validate = () => {
+        setIsFormValidState(currentRate.idLocation && currentRate.idCurrency && currentRate.date && currentRate.value !== null);
     };
 
     var data = React.useMemo(() => rates, [rates]);
@@ -175,156 +323,6 @@ const Rates = () => {
         ],
         []
     );
-
-    const handleUpdate = (rate) => {
-        setIsFormValidState(true);
-        console.log("Button clicked for rate: ", rate);
-        const formattedDate = rate.date ? new Date(rate.date).toISOString().split('T')[0] : '';
-
-        setCurrentRate({
-            ...rate,
-            date: formattedDate
-        });
-    };
-
-    const deleteRate = (rate) => {
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.delete(`http://localhost:3000/rate/delete`, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            },
-            data: {
-                idRates: rate.idRates // Pass the idrate in the data field
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully deleted rate');
-                    fetchRates();
-                } else {
-                    console.error('Failed to delete rate');
-                    showToastMessage('Failed to delete rate');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.rate.href = '/dashboard';
-                    }
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not delete rate: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.rate.href = '/dashboard';
-                }
-            })
-    };
-
-    const handleInsertClick = () => {
-        setIsFormValidState(false);
-        resetRate();
-    };
-
-    const resetRate = () => {
-        setCurrentRate({
-            idRates: null,
-            idrate: null,
-            idCurrency: null,
-            date: null,
-            value: null
-        });
-    };
-
-    const insertRate = () => {
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.post(`http://localhost:3000/rate/insert`, {
-            idLocation: currentRate.idLocation,
-            idCurrency: currentRate.idCurrency,
-            date: currentRate.date,
-            value: currentRate.value
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully inserted rate');
-                    fetchRates();
-                    //filter(searchValue);
-                    resetRate();
-                } else {
-                    console.error('Failed to insert rate');
-                    showToastMessage('Failed to insert rate');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.rate.href = '/dashboard';
-                    }
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not insert rate: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.rate.href = '/dashboard';
-                }
-            });
-    };
-
-    const updateRate = () => {
-        console.log("Updating rate with id: ", currentRate.idrate);
-        const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.put(`http://localhost:3000/rate/update`, {
-            idRates: currentRate.idRates,
-            idLocation: currentRate.idLocation,
-            idCurrency: currentRate.idCurrency,
-            date: currentRate.date,
-            value: currentRate.value
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}` // Send the token in the Authorization header
-            }
-        })
-            .then(response => {
-                if (response.data.success) {
-                    showToastMessage('Successfully updated rate');
-                    fetchRates();
-                } else {
-                    console.error('Failed to update rate');
-                    showToastMessage('Failed to update rate');
-                }
-            })
-            .catch(error => {
-                showToastMessage('Could not update rate: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.rate.href = '/dashboard';
-                }
-            });
-    };
-
-    const isFormValid = () => {
-        if (!currentRate.idLocation) {
-            showToastMessage('Location is required');
-            return false;
-        }
-        if (!currentRate.idCurrency) {
-            showToastMessage('Currency is required');
-            return false;
-        }
-        if (!currentRate.date) {
-            showToastMessage('Date is required');
-            return false;
-        }
-        if (currentRate.value === null) {
-            showToastMessage('Value is required');
-            return false;
-        }
-        return true;
-    };
-
-    const validate = () => {
-        setIsFormValidState(currentRate.idLocation && currentRate.idCurrency && currentRate.date && currentRate.value !== null);
-    };
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({ columns, data });
