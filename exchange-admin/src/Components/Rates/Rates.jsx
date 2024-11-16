@@ -179,7 +179,12 @@ const Rates = () => {
 
     const handleUpdate = (rate) => {
         console.log("Button clicked for rate: ", rate);
-        setCurrentRate(rate);
+        const formattedDate = rate.date ? new Date(rate.date).toISOString().split('T')[0] : '';
+
+        setCurrentRate({
+            ...rate,
+            date: formattedDate
+        });
     };
 
     const deleteRate = (rate) => {
@@ -281,18 +286,7 @@ const Rates = () => {
             .then(response => {
                 if (response.data.success) {
                     showToastMessage('Successfully updated rate');
-                    /*setRates(rates.map(rate =>
-                        rate.idRates === currentRate.idRates ? {
-                            ...rate, address: currentRate.address
-                            , latitude: currentRate.latitude, longitude: currentRate.longitude, information: currentRate.information
-                        } : rate
-                    ));
-                    setFilteredRates(filteredRates.map(rate =>
-                        rate.idrate === currentRate.idrate ? {
-                            ...rate, address: currentRate.address
-                            , latitude: currentRate.latitude, longitude: currentRate.longitude, information: currentRate.information
-                        } : rate
-                    ));*/
+                    fetchRates();
                 } else {
                     console.error('Failed to update rate');
                     showToastMessage('Failed to update rate');
@@ -363,6 +357,30 @@ const Rates = () => {
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
+                            <select
+                                className="form-control rate-input"
+                                value={currentRate.idLocation || ''}
+                                onChange={(e) => setCurrentRate({ ...currentRate, idLocation: e.target.value })}
+                            >
+                                <option value="" disabled>Select Location</option>
+                                {locations.map(location => (
+                                    <option key={location.idLocation} value={location.idLocation}>
+                                        {location.address}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className="form-control rate-input"
+                                value={currentRate.idCurrency || ''}
+                                onChange={(e) => setCurrentRate({ ...currentRate, idCurrency: e.target.value })}
+                            >
+                                <option value="" disabled>Select Currency</option>
+                                {currencies.map(currency => (
+                                    <option key={currency.idCurrency} value={currency.idCurrency}>
+                                        {currency.name}
+                                    </option>
+                                ))}
+                            </select>
                             <input
                                 type="date"
                                 className="form-control rate-input"
