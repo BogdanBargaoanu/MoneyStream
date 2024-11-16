@@ -9,8 +9,8 @@ const Rates = () => {
     const [currencies, setCurrencies] = useState([]);
     const [locations, setLocations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [filteredRates, setFilteredRates] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
+    const [isFormValidState, setIsFormValidState] = useState(false); // State to track form validity
     const [currentRate, setCurrentRate] = useState({
         idRates: null,
         idLocation: null,
@@ -31,7 +31,6 @@ const Rates = () => {
             .then(response => {
                 if (response.data.success) {
                     setRates(response.data.result);
-                    setFilteredRates(response.data.result);
                 }
                 else {
                     console.error('Failed to fetch rates');
@@ -132,7 +131,7 @@ const Rates = () => {
 
     };
 
-    var data = React.useMemo(() => filteredRates, [filteredRates]);
+    var data = React.useMemo(() => rates, [rates]);
     const columns = React.useMemo(
         () => [
             {
@@ -178,6 +177,7 @@ const Rates = () => {
     );
 
     const handleUpdate = (rate) => {
+        setIsFormValidState(true);
         console.log("Button clicked for rate: ", rate);
         const formattedDate = rate.date ? new Date(rate.date).toISOString().split('T')[0] : '';
 
@@ -200,7 +200,7 @@ const Rates = () => {
             .then(response => {
                 if (response.data.success) {
                     showToastMessage('Successfully deleted rate');
-                    setRates(rates.filter(r => r.idRates !== rate.idRates));
+                    fetchRates();
                 } else {
                     console.error('Failed to delete rate');
                     showToastMessage('Failed to delete rate');
@@ -220,6 +220,7 @@ const Rates = () => {
     };
 
     const handleInsertClick = () => {
+        setIsFormValidState(false);
         resetRate();
     };
 
@@ -301,6 +302,30 @@ const Rates = () => {
             });
     };
 
+    const isFormValid = () => {
+        if (!currentRate.idLocation) {
+            showToastMessage('Location is required');
+            return false;
+        }
+        if (!currentRate.idCurrency) {
+            showToastMessage('Currency is required');
+            return false;
+        }
+        if (!currentRate.date) {
+            showToastMessage('Date is required');
+            return false;
+        }
+        if (currentRate.value === null) {
+            showToastMessage('Value is required');
+            return false;
+        }
+        return true;
+    };
+
+    const validate = () => {
+        setIsFormValidState(currentRate.idLocation && currentRate.idCurrency && currentRate.date && currentRate.value !== null);
+    };
+
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
         useTable({ columns, data });
     return (
@@ -353,14 +378,14 @@ const Rates = () => {
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">rate</h5>
+                            <h5 class="modal-title">Rate</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <select
                                 className="form-control rate-input"
                                 value={currentRate.idLocation || ''}
-                                onChange={(e) => setCurrentRate({ ...currentRate, idLocation: e.target.value })}
+                                onChange={(e) => { setCurrentRate({ ...currentRate, idLocation: e.target.value }); validate() }}
                             >
                                 <option value="" disabled>Select Location</option>
                                 {locations.map(location => (
@@ -372,7 +397,7 @@ const Rates = () => {
                             <select
                                 className="form-control rate-input"
                                 value={currentRate.idCurrency || ''}
-                                onChange={(e) => setCurrentRate({ ...currentRate, idCurrency: e.target.value })}
+                                onChange={(e) => { setCurrentRate({ ...currentRate, idCurrency: e.target.value }); validate() }}
                             >
                                 <option value="" disabled>Select Currency</option>
                                 {currencies.map(currency => (
@@ -385,20 +410,34 @@ const Rates = () => {
                                 type="date"
                                 className="form-control rate-input"
                                 value={currentRate.date || ''}
-                                onChange={(e) => setCurrentRate({ ...currentRate, date: e.target.value })}
+                                onChange={(e) => { setCurrentRate({ ...currentRate, date: e.target.value }); validate() }}
                                 placeholder="Enter date"
                             />
                             <input
                                 type="number"
                                 className="form-control rate-input"
                                 value={currentRate.value !== null ? currentRate.value : ''}
-                                onChange={(e) => setCurrentRate({ ...currentRate, value: e.target.value })}
+                                onChange={(e) => { setCurrentRate({ ...currentRate, value: e.target.value }); validate() }}
                                 placeholder="Enter value"
                             />
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onClick={() => currentRate.idrate === null ? insertRate() : updateRate()}>Save changes</button>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                data-bs-dismiss={isFormValidState ? "modal" : undefined}
+                                onClick={() => {
+                                    if (isFormValid()) {
+                                        setIsFormValidState(true); // Set form validity state
+                                        currentRate.idRates === null ? insertRate() : updateRate();
+                                    } else {
+                                        setIsFormValidState(false); // Set form validity state
+                                    }
+                                }}
+                            >
+                                Save changes
+                            </button>
                         </div>
                     </div>
                 </div>

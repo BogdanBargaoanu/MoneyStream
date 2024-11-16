@@ -248,3 +248,7 @@ tbody td:hover:before {
 .btn-update {
   margin-right: 10px;
 }
+
+.toast-message {
+  z-index: 9999;
+}
