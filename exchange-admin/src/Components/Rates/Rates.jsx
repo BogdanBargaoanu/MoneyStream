@@ -7,6 +7,7 @@ import axios from 'axios';
 const Rates = () => {
     const [rates, setRates] = useState([]);
     const [currencies, setCurrencies] = useState([]);
+    const [locations, setLocations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [filteredRates, setFilteredRates] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
@@ -84,9 +85,40 @@ const Rates = () => {
             });
     };
 
+    const fetchLocations = () => {
+        const token = localStorage.getItem('user-token');
+        axios.get(`http://localhost:3000/location/partner`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}` // send the token in the Authorization header
+                }
+            })
+            .then(response => {
+                if (response.data.success) {
+                    setLocations(response.data.result);
+                }
+                else {
+                    console.error('Failed to fetch locations');
+                    if (response?.data?.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+                if (error.response.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
+            });
+    };
+
     useEffect(() => {
         fetchRates();
         fetchCurrencies();
+        fetchLocations();
         setIsLoading(false);
     }, []);
 
