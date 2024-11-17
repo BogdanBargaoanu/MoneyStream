@@ -48,27 +48,27 @@ const NearestRates = () => {
 
     return (
         <div className='container-nearest-rates'>
-            <MdOutlineArrowBack className='home-button' onClick={navigateHome}/>
+            <MdOutlineArrowBack className='home-button' onClick={navigateHome} />
             <h1 className='heading-nearest-rates'><ImLocation /> Nearest Rates</h1>
             <div className='row-group'>
                 <p className='space'>Latitude: {latitude}</p>
                 <p>Longitude: {longitude}</p>
             </div>
             <div className='data-container'>
-            {nearestRates.length > 0 ? (
-                <ul>
-                    {nearestRates.map((rate, index) => (
-                        <li key={index}>
-                            <p>Address: {rate.address}</p>
-                            <p>Currency: {rate.name}</p>
-                            <p>Rate: {rate.value}</p>
-                            <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No rates found.</p>
-            )}
+                {nearestRates.length > 0 ? (
+                    <ul>
+                        {nearestRates.map((rate, index) => (
+                            <li key={index}>
+                                <p>Address: {rate.address}</p>
+                                <p>Currency: {rate.name}</p>
+                                <p>Rate: {rate.value}</p>
+                                <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No rates found.</p>
+                )}
             </div>
         </div>
     );

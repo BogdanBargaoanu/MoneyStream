@@ -529,7 +529,7 @@ router.get('/nearest', function (req, res, next) {
             res.status(500).json({ error: err.message, success: false });
             return;
         }
-        res.json({ result,  page: page, success: true });
+        res.json({ result, page: page, success: true });
     });
 });
 

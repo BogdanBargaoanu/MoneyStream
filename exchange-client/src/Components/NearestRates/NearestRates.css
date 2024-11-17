@@ -24,9 +24,3 @@
 .space {
     margin-right: 1rem;
 }
-
-.data-container {
-    flex: 1; 
-    overflow-y: auto;
-    width: 100%;
-}
