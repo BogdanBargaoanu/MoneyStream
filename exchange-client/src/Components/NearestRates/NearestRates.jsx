@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import './NearestRates.css';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { MdOutlineArrowBack } from "react-icons/md";
+import { ImLocation } from "react-icons/im";
 
 const NearestRates = () => {
     const location = useLocation();
@@ -15,18 +16,18 @@ const NearestRates = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
 
-    const fetchNearestRates = () => {
+    const fetchNearestRates = useCallback((latitude, longitude, page) => {
         axios.get(`http://localhost:3000/rate/nearest`, {
             params: {
                 latitude: latitude,
                 longitude: longitude,
-                page: currentPage
+                page: page
             },
         })
             .then(response => {
                 if (response.data.success) {
                     setNearestRates(prevRates => [...prevRates, ...response.data.result]);
-                    setCurrentPage(currentPage + 1);
+                    setCurrentPage(page + 1);
                 }
                 else {
                     console.error('Failed to fetch locations');
@@ -34,16 +35,12 @@ const NearestRates = () => {
             })
             .catch(error => {
                 console.error(error);
-                if (error.response.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
             });
-    };
+    }, []);
 
     useEffect(() => {
-        fetchNearestRates();
-    }, []);
+        fetchNearestRates(latitude, longitude, currentPage);
+    }, [latitude, longitude, currentPage, fetchNearestRates]);
 
     const navigateHome = () => {
         navigate('/');
@@ -52,7 +49,7 @@ const NearestRates = () => {
     return (
         <div className='container-nearest-rates'>
             <MdOutlineArrowBack className='home-button' onClick={navigateHome}/>
-            <h1 className='heading-nearest-rates'>Nearest Rates</h1>
+            <h1 className='heading-nearest-rates'><ImLocation /> Nearest Rates</h1>
             <div className='row-group'>
                 <p className='space'>Latitude: {latitude}</p>
                 <p>Longitude: {longitude}</p>
