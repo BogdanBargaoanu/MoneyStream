@@ -12,6 +12,13 @@ const Dashboard = () => {
         fetchRates();
     }, []);
 
+    useEffect(() => {
+        if (rates) {
+            const data = prepareChartData(rates);
+            setRatesData(data);
+        }
+    }, [rates]);
+
     const fetchRates = () => {
         const token = localStorage.getItem('user-token');
         axios.get(`http://localhost:3000/rate`, {
@@ -22,8 +29,6 @@ const Dashboard = () => {
             .then(response => {
                 if (response.data.success) {
                     setRates(response.data.result);
-                    const data = prepareChartData(rates);
-                    setRatesData(data);
                 } else {
                     console.error('Failed to fetch rates');
                 }
@@ -65,13 +70,13 @@ const Dashboard = () => {
         return chartData;
     };
 
-    const seriesOptions = ratesData && ratesData.length > 0 && ratesData[0] ? generateSeriesOptions(ratesData[0].length - 1) : [];
-
     const generateSeriesOptions = (numSeries) => {
         const seriesOptions = {};
         for (let i = 0; i < numSeries; i++) {
             seriesOptions[i] = { curveType: 'function', lineWidth: 3 };
         }
+        console.log(seriesOptions);
+        console.log(ratesData);
         return seriesOptions;
     };
 
@@ -104,7 +109,7 @@ const Dashboard = () => {
                             legend: {
                                 textStyle: { color: '#FFF' } // Set legend text color to white
                             },
-                            series: seriesOptions, // Generate series options dynamically
+                            series: generateSeriesOptions(ratesData[0].length - 1), // Generate series options dynamically
                         }}
                     />
                 </div>

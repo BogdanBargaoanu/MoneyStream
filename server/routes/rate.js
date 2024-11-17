@@ -435,4 +435,102 @@ router.delete('/delete', function (req, res, next) {
     });
 });
 
+/**
+ * @openapi
+ * /rate/nearest:
+ *   get:
+ *     tags:
+ *      - rate
+ *     description: Gets the top 5 nearest rates ordered by date.
+ *     parameters:
+ *       - name: latitude
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: number
+ *           format: double
+ *       - name: longitude
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: number
+ *           format: double
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *     responses:
+ *       200:
+ *         description: Returns the nearest rates.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 idRates:
+ *                   type: integer
+ *                 idLocation:
+ *                   type: integer
+ *                 address:
+ *                   type: string
+ *                 idCurrency:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 value:
+ *                   type: number
+ *                   format: double
+ *                 distance:
+ *                   type: number
+ *                   format: double
+ *                 page:
+ *                   type: integer
+ *                 success:
+ *                   type: boolean
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ */
+
+router.get('/nearest', function (req, res, next) {
+    const { latitude, longitude, page = 1 } = req.query;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+
+    if (!latitude || !longitude) {
+        res.status(400).json({ error: 'The request has missing information!', success: false });
+        return;
+    }
+
+    const query = `
+        SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value,
+        (6371 * acos(cos(radians(${latitude})) * cos(radians(location.latitude)) * cos(radians(location.longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(location.latitude)))) AS distance
+        FROM rate
+        INNER JOIN location ON rate.idLocation = location.idLocation
+        INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+        ORDER BY distance, rate.date DESC
+        LIMIT ${limit} OFFSET ${offset}`;
+
+    req.db.query(query, (err, result) => {
+        if (err) {
+            res.status(500).json({ error: err.message, success: false });
+            return;
+        }
+        res.json({ result, page: page, success: true });
+    });
+});
+
 module.exports = router;

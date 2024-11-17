@@ -1,0 +1,13 @@
+.container-best-rates {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    animation: slide-up-fade-in 1s ease;
+}
+
+.heading-best-rates {
+    font-size: 8vmin;
+    color: var(--text-color);
+    flex-shrink: 0;
+}
