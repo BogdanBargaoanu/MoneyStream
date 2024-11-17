@@ -21,8 +21,7 @@ const Dashboard = () => {
         })
             .then(response => {
                 if (response.data.success) {
-                    const rates = response.data.result;
-                    setRates(rates);
+                    setRates(response.data.result);
                     const data = prepareChartData(rates);
                     setRatesData(data);
                 } else {
@@ -66,6 +65,8 @@ const Dashboard = () => {
         return chartData;
     };
 
+    const seriesOptions = ratesData && ratesData.length > 0 && ratesData[0] ? generateSeriesOptions(ratesData[0].length - 1) : [];
+
     const generateSeriesOptions = (numSeries) => {
         const seriesOptions = {};
         for (let i = 0; i < numSeries; i++) {
@@ -103,7 +104,7 @@ const Dashboard = () => {
                             legend: {
                                 textStyle: { color: '#FFF' } // Set legend text color to white
                             },
-                            series: generateSeriesOptions(ratesData[0].length - 1), // Generate series options dynamically
+                            series: seriesOptions, // Generate series options dynamically
                         }}
                     />
                 </div>

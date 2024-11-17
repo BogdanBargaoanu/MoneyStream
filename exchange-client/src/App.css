@@ -1,5 +1,16 @@
+:root {
+  --button-color: #7852DA;
+  --button-color-text: #060b26;
+  --font-family: 'Roboto', sans-serif;
+}
+
+* {
+  font-family: var(--font-family);
+}
+
 .App {
   text-align: center;
+  height: 100%;
 }
 
 .App-logo {
@@ -7,9 +18,31 @@
   pointer-events: none;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  height: 100vh;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes slide-up-fade-in {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
