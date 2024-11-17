@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './NearestRates.css';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { MdOutlineArrowBack } from "react-icons/md";
 
 const NearestRates = () => {
     const location = useLocation();
@@ -11,8 +13,9 @@ const NearestRates = () => {
 
     const [nearestRates, setNearestRates] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const navigate = useNavigate();
 
-    const fetchNearestRates = async () => {
+    const fetchNearestRates = () => {
         axios.get(`http://localhost:3000/rate/nearest`, {
             params: {
                 latitude: latitude,
@@ -42,14 +45,19 @@ const NearestRates = () => {
         fetchNearestRates();
     }, []);
 
+    const navigateHome = () => {
+        navigate('/');
+    };
+
     return (
         <div className='container-nearest-rates'>
+            <MdOutlineArrowBack className='home-button' onClick={navigateHome}/>
             <h1 className='heading-nearest-rates'>Nearest Rates</h1>
-            <div className="row-group">
+            <div className='row-group'>
                 <p className='space'>Latitude: {latitude}</p>
                 <p>Longitude: {longitude}</p>
             </div>
-            <div className="data-container">
+            <div className='data-container'>
             {nearestRates.length > 0 ? (
                 <ul>
                     {nearestRates.map((rate, index) => (

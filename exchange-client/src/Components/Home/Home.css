@@ -4,6 +4,7 @@
     align-items: center;
     flex-direction: column;
     height: 90%;
+    animation: slide-up-fade-in 1s ease;
 }
 
 .btn-main {
