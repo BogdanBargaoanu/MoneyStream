@@ -1,0 +1,31 @@
+.container-nearest-rates {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.heading-nearest-rates {
+    font-size: 8vmin;
+    color: var(--text-color);
+    flex-shrink: 0;
+}
+
+.row-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-top: -3rem;
+    flex-shrink: 0;
+}
+
+.space {
+    margin-right: 1rem;
+}
+
+.data-container {
+    flex: 1; 
+    overflow-y: auto;
+    width: 100%;
+}

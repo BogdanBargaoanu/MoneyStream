@@ -438,26 +438,29 @@ router.delete('/delete', function (req, res, next) {
 /**
  * @openapi
  * /rate/nearest:
- *   post:
+ *   get:
  *     tags:
  *      - rate
  *     description: Gets the top 5 nearest rates ordered by date.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               latitude:
- *                 type: number
- *                 format: double
- *               longitude:
- *                 type: number
- *                 format: double
- *               page:
- *                 type: integer
- *                 default: 1
+ *     parameters:
+ *       - name: latitude
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: number
+ *           format: double
+ *       - name: longitude
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: number
+ *           format: double
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
  *     responses:
  *       200:
  *         description: Returns the nearest rates.
@@ -502,8 +505,8 @@ router.delete('/delete', function (req, res, next) {
  *                   type: boolean
  */
 
-router.post('/nearest', function (req, res, next) {
-    const { latitude, longitude, page = 1 } = req.body;
+router.get('/nearest', function (req, res, next) {
+    const { latitude, longitude, page = 1 } = req.query;
     const limit = 5;
     const offset = (page - 1) * limit;
 
