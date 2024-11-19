@@ -42,6 +42,20 @@ const NearestRates = () => {
         fetchNearestRates(latitude, longitude, currentPage);
     }, [latitude, longitude, currentPage, fetchNearestRates]);
 
+    const generateMapUrlFromAddress = (address) => {
+        if (address) {
+            return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}&zoom=16&maptype=roadmap`;
+        }
+        return '';
+    };
+
+    const generateMapUrlFromLatLong = (latitude, longitude) => {
+        if (latitude && longitude) {
+            return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=15`;
+        }
+        return '';
+    };
+
     const navigateHome = () => {
         navigate('/');
     };
@@ -63,6 +77,13 @@ const NearestRates = () => {
                                 <p>Currency: {rate.name}</p>
                                 <p>Rate: {rate.value}</p>
                                 <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
+                                <iframe
+                                    width="80%"
+                                    height="300px"
+                                    loading="lazy"
+                                    allowFullScreen
+                                    src={generateMapUrlFromAddress(rate.address)}
+                                ></iframe>
                             </li>
                         ))}
                     </ul>
