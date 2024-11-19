@@ -13,10 +13,12 @@ const NearestRates = () => {
     const longitude = queryParams.get('lng');
 
     const [nearestRates, setNearestRates] = useState([]);
+    const [groupedRates, setGroupedRates] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
 
     const fetchNearestRates = useCallback((latitude, longitude, page) => {
+        console.log('fetching nearest rates');
         axios.get(`http://localhost:3000/rate/nearest`, {
             params: {
                 latitude: latitude,
@@ -27,7 +29,7 @@ const NearestRates = () => {
             .then(response => {
                 if (response.data.success) {
                     setNearestRates(prevRates => [...prevRates, ...response.data.result]);
-                    setCurrentPage(page + 1);
+                    //setGroupedRates(groupRatesByLocation(rates));
                 }
                 else {
                     console.error('Failed to fetch locations');
@@ -41,6 +43,10 @@ const NearestRates = () => {
     useEffect(() => {
         fetchNearestRates(latitude, longitude, currentPage);
     }, [latitude, longitude, currentPage, fetchNearestRates]);
+
+    const loadNewData = () => {
+        setCurrentPage(currentPage + 1);
+    };
 
     const generateMapUrlFromAddress = (address) => {
         if (address) {
