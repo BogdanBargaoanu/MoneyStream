@@ -40,8 +40,23 @@ const NearestRates = () => {
     }, []);
 
     useEffect(() => {
-        fetchNearestRates(latitude, longitude, currentPage);
+        fetchNearestRates(latitude, longitude, currentPage); // Double fetch due to the React.StrictMode warning
     }, [latitude, longitude, currentPage, fetchNearestRates]);
+
+    useEffect(() => {
+        // Group the rates by address
+        const groupByAddress = (rates) => {
+            return rates.reduce((acc, rate) => {
+                if (!acc[rate.address]) {
+                    acc[rate.address] = [];
+                }
+                acc[rate.address].push(rate);
+                return acc;
+            }, {});
+        };
+
+        setGroupedRates(groupByAddress(nearestRates));
+    }, [nearestRates]);
 
     const loadNewData = () => {
         setCurrentPage(currentPage + 1);
@@ -74,24 +89,27 @@ const NearestRates = () => {
                 <p>Longitude: {longitude}</p>
             </div>
             <div className='data-container'>
-                {nearestRates.length > 0 ? (
+                {Object.keys(groupedRates).length > 0 ? (
                     <ul>
-                        {nearestRates.map((rate, index) => (
-                            <div className='container-rate'>
-                                <li key={index}>
-                                    <p>Address: {rate.address}</p>
-                                    <p>Currency: {rate.name}</p>
-                                    <p>Rate: {rate.value}</p>
-                                    <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
-                                    <iframe
-                                        width="80%"
-                                        height="300px"
-                                        loading="lazy"
-                                        allowFullScreen
-                                        src={generateMapUrlFromAddress(rate.address)}
-                                    ></iframe>
-                                </li>
-
+                        {Object.entries(groupedRates).map(([address, rates], index) => (
+                            <div className='container-rate' key={index}>
+                                <h3>Address: {address}</h3>
+                                <iframe
+                                    width="80%"
+                                    height="300px"
+                                    loading="lazy"
+                                    allowFullScreen
+                                    src={generateMapUrlFromAddress(address)}
+                                ></iframe>
+                                <ul>
+                                    {rates.map((rate, idx) => (
+                                        <li key={idx}>
+                                            <p>Currency: {rate.name}</p>
+                                            <p>Rate: {rate.value}</p>
+                                            <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         ))}
                     </ul>
