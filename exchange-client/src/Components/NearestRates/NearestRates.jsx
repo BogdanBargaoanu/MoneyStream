@@ -29,7 +29,6 @@ const NearestRates = () => {
             .then(response => {
                 if (response.data.success) {
                     setNearestRates(prevRates => [...prevRates, ...response.data.result]);
-                    //setGroupedRates(groupRatesByLocation(rates));
                 }
                 else {
                     console.error('Failed to fetch locations');
@@ -97,6 +96,7 @@ const NearestRates = () => {
                     <p>No rates found.</p>
                 )}
             </div>
+            <button className='load-more' onClick={loadNewData}>Load More</button>
         </div>
     );
 }
