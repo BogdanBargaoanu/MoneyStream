@@ -77,19 +77,22 @@ const NearestRates = () => {
                 {nearestRates.length > 0 ? (
                     <ul>
                         {nearestRates.map((rate, index) => (
-                            <li key={index}>
-                                <p>Address: {rate.address}</p>
-                                <p>Currency: {rate.name}</p>
-                                <p>Rate: {rate.value}</p>
-                                <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
-                                <iframe
-                                    width="80%"
-                                    height="300px"
-                                    loading="lazy"
-                                    allowFullScreen
-                                    src={generateMapUrlFromAddress(rate.address)}
-                                ></iframe>
-                            </li>
+                            <div className='container-rate'>
+                                <li key={index}>
+                                    <p>Address: {rate.address}</p>
+                                    <p>Currency: {rate.name}</p>
+                                    <p>Rate: {rate.value}</p>
+                                    <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
+                                    <iframe
+                                        width="80%"
+                                        height="300px"
+                                        loading="lazy"
+                                        allowFullScreen
+                                        src={generateMapUrlFromAddress(rate.address)}
+                                    ></iframe>
+                                </li>
+
+                            </div>
                         ))}
                     </ul>
                 ) : (

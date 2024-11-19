@@ -24,3 +24,8 @@
     animation: slide-up-fade-in 0.5s ease;
     transition: transform 0.5s ease;
 }
+
+iframe {
+    border: none;
+    border-radius: 1rem;
+}
