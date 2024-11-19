@@ -48,28 +48,3 @@
 .load-more:hover {
     transform: translate(-50%, calc(-50% - 10px));
 }
-
-
-.container-rate {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    margin: 1rem;
-    padding: 1rem;
-    border-radius: 2rem;
-    background-color: var(--container-background);
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.75);
-    transition: transform 0.5s ease;
-}
-
-.container-rate li {
-    list-style-type: none;
-    font-size: 2vmin;
-    width: 100%;
-}
-
-iframe {
-    border: none;
-    border-radius: 2rem;
-}
