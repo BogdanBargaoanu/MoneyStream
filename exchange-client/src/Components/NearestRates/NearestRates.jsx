@@ -13,10 +13,12 @@ const NearestRates = () => {
     const longitude = queryParams.get('lng');
 
     const [nearestRates, setNearestRates] = useState([]);
+    const [groupedRates, setGroupedRates] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
 
     const fetchNearestRates = useCallback((latitude, longitude, page) => {
+        console.log('fetching nearest rates');
         axios.get(`http://localhost:3000/rate/nearest`, {
             params: {
                 latitude: latitude,
@@ -27,7 +29,6 @@ const NearestRates = () => {
             .then(response => {
                 if (response.data.success) {
                     setNearestRates(prevRates => [...prevRates, ...response.data.result]);
-                    setCurrentPage(page + 1);
                 }
                 else {
                     console.error('Failed to fetch locations');
@@ -39,8 +40,41 @@ const NearestRates = () => {
     }, []);
 
     useEffect(() => {
-        fetchNearestRates(latitude, longitude, currentPage);
+        fetchNearestRates(latitude, longitude, currentPage); // Double fetch due to the React.StrictMode warning
     }, [latitude, longitude, currentPage, fetchNearestRates]);
+
+    useEffect(() => {
+        // Group the rates by address
+        const groupByAddress = (rates) => {
+            return rates.reduce((acc, rate) => {
+                if (!acc[rate.address]) {
+                    acc[rate.address] = [];
+                }
+                acc[rate.address].push(rate);
+                return acc;
+            }, {});
+        };
+
+        setGroupedRates(groupByAddress(nearestRates));
+    }, [nearestRates]);
+
+    const loadNewData = () => {
+        setCurrentPage(currentPage + 1);
+    };
+
+    const generateMapUrlFromAddress = (address) => {
+        if (address) {
+            return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}&zoom=16&maptype=roadmap`;
+        }
+        return '';
+    };
+
+    const generateMapUrlFromLatLong = (latitude, longitude) => {
+        if (latitude && longitude) {
+            return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=15`;
+        }
+        return '';
+    };
 
     const navigateHome = () => {
         navigate('/');
@@ -55,21 +89,35 @@ const NearestRates = () => {
                 <p>Longitude: {longitude}</p>
             </div>
             <div className='data-container'>
-                {nearestRates.length > 0 ? (
+                {Object.keys(groupedRates).length > 0 ? (
                     <ul>
-                        {nearestRates.map((rate, index) => (
-                            <li key={index}>
-                                <p>Address: {rate.address}</p>
-                                <p>Currency: {rate.name}</p>
-                                <p>Rate: {rate.value}</p>
-                                <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
-                            </li>
+                        {Object.entries(groupedRates).map(([address, rates], index) => (
+                            <div className='container-rate' key={index}>
+                                <h3>Address: {address}</h3>
+                                <iframe
+                                    width="80%"
+                                    height="300px"
+                                    loading="lazy"
+                                    allowFullScreen
+                                    src={generateMapUrlFromAddress(address)}
+                                ></iframe>
+                                <ul>
+                                    {rates.map((rate, idx) => (
+                                        <li key={idx}>
+                                            <p>Currency: {rate.name}</p>
+                                            <p>Rate: {rate.value}</p>
+                                            <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         ))}
                     </ul>
                 ) : (
                     <p>No rates found.</p>
                 )}
             </div>
+            <button className='load-more' onClick={loadNewData}>Load More</button>
         </div>
     );
 }

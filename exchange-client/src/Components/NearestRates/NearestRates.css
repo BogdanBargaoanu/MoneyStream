@@ -24,3 +24,52 @@
 .space {
     margin-right: 1rem;
 }
+
+.load-more {
+    position: fixed;
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    border: none;
+    background-color: var(--button-color);
+    color: var(--button-color-text);
+    border-radius: 1rem;
+    padding: 0.5rem 2rem;
+    font-size: 5vmin;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.5s ease, background-color 0.5s ease;
+    margin: 1rem;
+    width: 40%;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.75);
+}
+
+.load-more:hover {
+    transform: translate(-50%, calc(-50% - 10px));
+}
+
+
+.container-rate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 1rem;
+    padding: 1rem;
+    border-radius: 2rem;
+    background-color: var(--container-background);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.75);
+    transition: transform 0.5s ease;
+}
+
+.container-rate li {
+    list-style-type: none;
+    font-size: 2vmin;
+    width: 100%;
+}
+
+iframe {
+    border: none;
+    border-radius: 2rem;
+}
