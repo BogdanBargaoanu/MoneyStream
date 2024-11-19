@@ -31,7 +31,7 @@ const NearestRates = () => {
                     setNearestRates(prevRates => [...prevRates, ...response.data.result]);
                 }
                 else {
-                    console.error('Failed to fetch locations');
+                    console.error('Failed to fetch rates');
                 }
             })
             .catch(error => {
