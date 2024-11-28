@@ -583,13 +583,91 @@ router.get('/allRates', function (req, res, next) {
 
     const query = `SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value FROM rate
                     INNER JOIN location ON rate.idLocation = location.idLocation
-                    INNER JOIN currency ON rate.idCurrency = currency.idCurrency`;
+                    INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+                    ORDER BY rate.date DESC`;
     req.db.query(query, (err, result) => {
         if (err) {
             res.status(500).json({ error: err.message, success: false });
             return;
         }
         res.json({ result, success: true });
+    });
+});
+
+/**
+ * @openapi
+ * /rate/best:
+ *   get:
+ *     tags:
+ *       - rate
+ *     description: Gets the top 5 best rates ordered by date.
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *     responses:
+ *       200:
+ *         description: Returns the best rates.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 idRates:
+ *                   type: integer
+ *                 idLocation:
+ *                   type: integer
+ *                 address:
+ *                   type: string
+ *                 idCurrency:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 value:
+ *                   type: number
+ *                   format: double
+ *                 page:
+ *                   type: integer
+ *                 success:
+ *                   type: boolean
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ */
+
+router.get('/best', function (req, res, next) {
+    const { page = 1 } = req.query;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+
+    const query = `
+        SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value
+        FROM rate
+        INNER JOIN location ON rate.idLocation = location.idLocation
+        INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+        ORDER BY rate.value DESC, rate.date DESC
+        LIMIT ${limit} OFFSET ${offset}`;
+
+    req.db.query(query, (err, result) => {
+        if (err) {
+            res.status(500).json({ error: err.message, success: false });
+            return;
+        }
+        res.json({ result, page: page, success: true });
     });
 });
 
