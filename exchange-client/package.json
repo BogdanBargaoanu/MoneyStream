@@ -18,6 +18,7 @@
   "scripts": {
     "start": "react-scripts start",
     "https": "set HTTPS=true&& set SSL_CRT_FILE=./certs/cert.crt&& set SSL_KEY_FILE=./certs/cert.key&& react-scripts start",
+    "localtunnel": "lt --port 3001",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
