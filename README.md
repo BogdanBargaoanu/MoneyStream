@@ -110,6 +110,7 @@ This repository contains three main components of the Exchange Rate Application:
 
 - Login Functionality.
 > The admin app includes a login page where administrators must authenticate using their credentials.
+>
 > JWT tokens are used to manage sessions securely.
 - Manage exchange rates, locations, and currencies.
 - View and update rates.
@@ -121,7 +122,7 @@ This repository contains three main components of the Exchange Rate Application:
 
 - View nearest exchange rates based on location.
 - View best exchange rates.
-- Map integration using OpenStreetMap.
+- Map integration with Google Maps.
 - Reactive design.
 
 ## Contributing
