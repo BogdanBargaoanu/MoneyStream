@@ -583,7 +583,8 @@ router.get('/allRates', function (req, res, next) {
 
     const query = `SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value FROM rate
                     INNER JOIN location ON rate.idLocation = location.idLocation
-                    INNER JOIN currency ON rate.idCurrency = currency.idCurrency`;
+                    INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+                    ORDER BY rate.date DESC`;
     req.db.query(query, (err, result) => {
         if (err) {
             res.status(500).json({ error: err.message, success: false });
