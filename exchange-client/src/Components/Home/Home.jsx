@@ -10,11 +10,24 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
     const navigate = useNavigate();
 
-    const requireGeolocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
+    const requireGeolocation = async () => {
+        if (!navigator.geolocation) {
             alert('Geolocation is not supported by this browser.');
+            return;
+        }
+    
+        try {
+            const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+    
+            if (permissionStatus.state === 'granted') {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else if (permissionStatus.state === 'prompt') {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Permission to access location is denied. Please enable it in your device settings.");
+            }
+        } catch (error) {
+            alert('An error occurred while checking permissions: ' + error.message);
         }
     };
 
