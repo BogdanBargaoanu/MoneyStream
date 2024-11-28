@@ -1,5 +1,9 @@
 # Exchange Rate Application
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-g.svg)](https://opensource.org/licenses/MIT)
+
+The Exchange Rate Application is a comprehensive platform designed to provide users with real-time exchange rates, manage exchange rate data, and visualize currency trends. It includes a robust backend server, an admin interface for managing data, and a client interface for end-users to view the best and nearest exchange rates.
+
 This repository contains three main components of the Exchange Rate Application:
 1. **Server App**: Backend server that handles API requests and database interactions.
 2. **Exchange Admin App**: Admin interface for managing exchange rates, locations, and currencies.
@@ -25,7 +29,7 @@ This repository contains three main components of the Exchange Rate Application:
   - Axios for API requests
   - React Router for navigation
   - React Icons for icons
-  - OpenStreetMap for map integration
+  - React Google Charts for data visualization
 
 ## Setup Instructions
 
@@ -48,7 +52,7 @@ This repository contains three main components of the Exchange Rate Application:
 
 3. **Set up the database**:
    - Create a MySQL database and import the provided schema.
-   - Update the database configuration in `server/config/db.js`.
+   - Update the database configuration in `server/app.js`.
 
 4. **Run the server**:
    ```bash
@@ -97,13 +101,16 @@ This repository contains three main components of the Exchange Rate Application:
 
 
 ### Server App
-
-## API Endpoints
-
-## Features
+ - API Security with JWT.
+ > The server uses JSON Web Tokens (JWT) to secure the API endpoints.
+ - Data Encryption
+ > User passwords are hashed using Bcrypt before being stored in the database to ensure security.
 
 ### Exchange Admin App
 
+- Login Functionality.
+> The admin app includes a login page where administrators must authenticate using their credentials.
+> JWT tokens are used to manage sessions securely.
 - Manage exchange rates, locations, and currencies.
 - View and update rates.
 - Insert new rates.
@@ -115,6 +122,7 @@ This repository contains three main components of the Exchange Rate Application:
 - View nearest exchange rates based on location.
 - View best exchange rates.
 - Map integration using OpenStreetMap.
+- Reactive design.
 
 ## Contributing
 
