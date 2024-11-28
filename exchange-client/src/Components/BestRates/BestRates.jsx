@@ -1,11 +1,73 @@
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import './BestRates.css';
 import { MdOutlineArrowBack } from "react-icons/md";
 import { MdOutlineVerified } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 
 const BestRates = () => {
+    const [nearestRates, setNearestRates] = useState([]);
+    const [groupedRates, setGroupedRates] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
+
+    const fetchBestRates = useCallback((page) => {
+        console.log('fetching best rates');
+        axios.get(`http://localhost:3000/rate/best`, {
+            params: {
+                page: page
+            },
+        })
+            .then(response => {
+                if (response.data.success) {
+                    setNearestRates(prevRates => [...prevRates, ...response.data.result]);
+                }
+                else {
+                    console.error('Failed to fetch rates');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
+
+    useEffect(() => {
+        fetchBestRates(currentPage); // Double fetch due to the React.StrictMode warning
+    }, [currentPage, fetchBestRates]);
+
+    useEffect(() => {
+        // Group the rates by address
+        const groupByAddress = (rates) => {
+            return rates.reduce((acc, rate) => {
+                if (!acc[rate.address]) {
+                    acc[rate.address] = [];
+                }
+                acc[rate.address].push(rate);
+                return acc;
+            }, {});
+        };
+
+        setGroupedRates(groupByAddress(nearestRates));
+    }, [nearestRates]);
+
+    const loadNewData = () => {
+        setCurrentPage(currentPage + 1);
+    };
+
+    const generateMapUrlFromAddress = (address) => {
+        if (address) {
+            return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}&zoom=16&maptype=roadmap`;
+        }
+        return '';
+    };
+
+    const generateMapUrlFromLatLong = (latitude, longitude) => {
+        if (latitude && longitude) {
+            return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=15`;
+        }
+        return '';
+    };
 
     const navigateHome = () => {
         navigate('/');
