@@ -113,7 +113,7 @@ This repository contains three main components of the Exchange Rate Application:
  - API Security with JWT.
  > The server uses JSON Web Tokens (JWT) to secure the API endpoints.
  - Data Encryption
- > User passwords are hashed using Bcrypt before being stored in the database to ensure security.
+ > User passwords are hashed using MD5 before being stored in the database to ensure security.
 
 ### Exchange Admin App
 
