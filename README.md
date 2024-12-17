@@ -4,6 +4,15 @@
 
 The Exchange Rate Application is a comprehensive platform designed to provide users with real-time exchange rates, manage exchange rate data, and visualize currency trends. It includes a robust backend server, an admin interface for managing data, and a client interface for end-users to view the best and nearest exchange rates.
 
+## Documentation 
+
+For a comprehensive documentation of this project, including system architecture, implementation details, please refer to the attached PDF document.
+> Note: The documentation is provided in Romanian.
+
+[Link to PDF](https://github.com/BogdanBargaoanu/exchange/blob/main/documentation/exchange_platform_documentation.pdf)
+
+## Summary
+
 This repository contains three main components of the Exchange Rate Application:
 1. **Server App**: Backend server that handles API requests and database interactions.
 2. **Exchange Admin App**: Admin interface for managing exchange rates, locations, and currencies.
