@@ -1,8 +1,8 @@
-# Exchange Rate Application
+# ExchangeMonitor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-g.svg)](https://opensource.org/licenses/MIT)
 
-The Exchange Rate Application is a comprehensive platform designed to provide users with real-time exchange rates, manage exchange rate data, and visualize currency trends. It includes a robust backend server, an admin interface for managing data, and a client interface for end-users to view the best and nearest exchange rates.
+Exchange monitor is a comprehensive platform designed to provide users with real-time exchange rates, manage exchange rate data, and visualize currency trends. It includes a robust backend server, an admin interface for managing data, and a client interface for end-users to view the best and nearest exchange rates.
 
 ## Documentation 
 
