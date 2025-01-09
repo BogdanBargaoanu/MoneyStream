@@ -35,7 +35,7 @@ const LoginPage = () => {
             username: username,
             email: email,
             password: password,
-            information: `Registration date:${Date.now().toString()}`
+            information: `Registration date:${new Date().toISOString()}`
         })
             .then(response => {
                 if (response.data.success) {
