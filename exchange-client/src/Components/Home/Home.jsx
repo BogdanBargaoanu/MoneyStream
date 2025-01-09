@@ -66,7 +66,7 @@ const Home = () => {
     return (
         <div className='container-main'>
             <img className='logo' src={logo} alt='logo' />
-            <h1 className='heading-main'>Exchange Monitor v0.1</h1>
+            <h1 className='heading-main'>MoneyStream v0.1</h1>
             <button className='btn-main' onClick={requireGeolocation}><ImLocation /> Nearest rates</button>
             <button className='btn-main' onClick={navigateBestRates}><MdOutlineVerified /> Best rates</button>
             <button className='btn-main' onClick={navigateAllRates}><PiListBulletsBold /> All rates</button>
