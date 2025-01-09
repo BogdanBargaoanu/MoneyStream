@@ -1,8 +1,8 @@
-# <img src="https://raw.githubusercontent.com/BogdanBargaoanu/ExchangeMonitor/refs/heads/main/exchange-client/src/Components/Assets/logo.png" style="width: 100px;">ExchangeMonitor
+# <img src="https://raw.githubusercontent.com/BogdanBargaoanu/ExchangeMonitor/refs/heads/main/exchange-client/src/Components/Assets/logo.png" style="width: 100px;">MoneyStream
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-Exchange monitor is a comprehensive platform designed to provide users with real-time exchange rates, manage exchange rate data, and visualize currency trends. It includes a robust backend server, an admin interface for managing data, and a client interface for end-users to view the best and nearest exchange rates.
+**MoneyStream** is a comprehensive platform designed to provide users with real-time exchange rates, manage exchange rate data, and visualize currency trends. It includes a robust backend server, an admin interface for managing data, and a client interface for end-users to view the best and nearest exchange rates.
 
 ## Documentation 
 
