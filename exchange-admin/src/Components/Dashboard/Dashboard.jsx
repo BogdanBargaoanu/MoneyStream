@@ -6,9 +6,12 @@ import axios from 'axios';
 const Dashboard = () => {
     const [rates, setRates] = useState([]);
     const [ratesData, setRatesData] = useState([]);
+    const [currencies, setCurrencies] = useState([]);
+    const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        fetchCurrencies();
         fetchRates();
     }, []);
 
@@ -18,6 +21,12 @@ const Dashboard = () => {
             setRatesData(data);
         }
     }, [rates]);
+
+    useEffect(() => {
+        if (selectedCurrency) {
+            filterChartData(selectedCurrency);
+        }
+    }, [selectedCurrency]);
 
     const fetchRates = () => {
         const token = localStorage.getItem('user-token');
@@ -37,6 +46,35 @@ const Dashboard = () => {
             .catch(error => {
                 console.error('Failed to fetch rates:', error);
                 setIsLoading(false);
+            })
+    };
+
+    const fetchCurrencies = () => {
+        const token = localStorage.getItem('user-token');
+        axios.get('http://localhost:3000/currency',
+            {
+                headers: {
+                    Authorization: `Bearer ${token}` // send the token in the Authorization header
+                }
+            })
+            .then(response => {
+                if (response.data.success) {
+                    setCurrencies(response.data.result);
+                }
+                else {
+                    console.error('Failed to fetch currencies');
+                    if (response?.data?.error === 'No authorization header') {
+                        localStorage.removeItem('user-token');
+                        window.location.href = '/dashboard';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                if (error.response?.data?.error === 'No authorization header') {
+                    localStorage.removeItem('user-token');
+                    window.location.href = '/dashboard';
+                }
             });
     };
 
@@ -70,6 +108,12 @@ const Dashboard = () => {
         return chartData;
     };
 
+    const filterChartData = (currencyId) => {
+        const filteredRates = rates.filter(rate => rate.idCurrency === parseInt(currencyId));
+        const data = prepareChartData(filteredRates);
+        setRatesData(data);
+    };
+
     const generateSeriesOptions = (numSeries) => {
         const seriesOptions = {};
         for (let i = 0; i < numSeries; i++) {
@@ -80,12 +124,24 @@ const Dashboard = () => {
         return seriesOptions;
     };
 
+    const handleCurrencyChange = (event) => {
+        setSelectedCurrency(event.target.value);
+    };
+
     return (
         <div>
             {isLoading ? (
                 <p>Loading...</p>
             ) : (
                 <div className='main-chart'>
+                    <select className='form-select main-select' onChange={handleCurrencyChange} value={selectedCurrency}>
+                        <option value='' selected disabled>Select a currency</option>
+                        {currencies.map(currency => (
+                            <option key={currency.idCurrency} value={currency.idCurrency}>
+                                {currency.name}
+                            </option>
+                        ))}
+                    </select>
                     <Chart
                         width={'100%'}
                         height={'85%'}
@@ -110,6 +166,12 @@ const Dashboard = () => {
                                 textStyle: { color: '#FFF' } // Set legend text color to white
                             },
                             series: generateSeriesOptions(ratesData[0].length - 1), // Generate series options dynamically
+                            explorer: {
+                                actions: ['dragToZoom', 'rightClickToReset'], // Enable zooming and panning
+                                axis: 'horizontal', // Allow zooming on the horizontal axis
+                                keepInBounds: true, // Keep the zoomed area within the chart bounds
+                                maxZoomIn: 4.0 // Maximum zoom level
+                            }
                         }}
                     />
                 </div>

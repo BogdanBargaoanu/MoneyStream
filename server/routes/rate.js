@@ -76,7 +76,8 @@ router.get('/', function (req, res, next) {
     const query = `SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value FROM rate
                     INNER JOIN location ON rate.idLocation = location.idLocation
                     INNER JOIN currency ON rate.idCurrency = currency.idCurrency
-                    WHERE location.idPartner = ${userId}`;
+                    WHERE location.idPartner = ${userId}
+                    ORDER BY rate.date ASC`;
     req.db.query(query, (err, result) => {
         if (err) {
             res.status(500).json({ error: err.message, success: false });
