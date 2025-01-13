@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const sendEmail = require('../emailService');
 
 /**
  * @openapi
@@ -217,8 +218,11 @@ router.post('/addPartner', function (req, res, next) {
         return;
     }
 
+    const email = req.body.email;
+    const name = req.body.username;
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(req.body.email)) {
+    if (!emailRegex.test(email)) {
         res.status(400).json({ success: false, error: 'Invalid email format!' });
         return;
     }
@@ -255,6 +259,30 @@ router.post('/addPartner', function (req, res, next) {
                         });
                     }
                     res.json({ success: true, message: 'Partner added successfully!' });
+
+                    // HTML content for the email
+                    const htmlContent = `
+                        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                            <h2 style="color: #4CAF50;">Welcome to MoneyStream, ${name}!</h2>
+                            <p>We are excited to have you on board. Here are some resources to get you started:</p>
+                            <ul>
+                                <li><a href="https://www.moneystream.com/getting-started">Getting Started Guide</a></li>
+                                <li><a href="https://www.moneystream.com/support">Support</a></li>
+                                <li><a href="https://www.moneystream.com/community">Community Forums</a></li>
+                            </ul>
+                            <p>Feel free to reach out to us if you have any questions.</p>
+                            <img src="https://i.imgur.com/0t2NQJM.png" alt="Welcome to MoneyStream" style="width: 100%; max-width: 300px; height: auto;"/>
+                            <p>Best regards,</p>
+                            <p>The MoneyStream Team</p>
+                        </div>
+                    `;
+                    // Send a welcome email
+                    sendEmail(
+                        email,
+                        'Welcome to MoneyStream',
+                        `Hello ${name}, welcome to MoneyStream!`,
+                        htmlContent
+                    );
                 });
             });
         });
