@@ -661,14 +661,21 @@ router.get('/allRates', function (req, res, next) {
 
 router.get('/best', function (req, res, next) {
     const { page = 1 } = req.query;
+    const currencyId = req.query.currencyId || -1;
     const limit = 5;
     const offset = (page - 1) * limit;
 
     const query = `
         SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value
+        FROM (
+        SELECT idLocation, MAX(date) AS latest_date
         FROM rate
-        INNER JOIN location ON rate.idLocation = location.idLocation
-        INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+        GROUP BY idLocation
+    ) AS latest_rates
+        INNER JOIN rate ON rate.idLocation = latest_rates.idLocation AND rate.date = latest_rates.latest_date
+		INNER JOIN location ON rate.idLocation = location.idLocation
+		INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+        WHERE rate.idCurrency = ${currencyId !== -1 ? currencyId : '(SELECT idCurrency FROM currency ORDER BY idCurrency ASC LIMIT 1)'}
         ORDER BY rate.value DESC, rate.date DESC
         LIMIT ${limit} OFFSET ${offset}`;
 

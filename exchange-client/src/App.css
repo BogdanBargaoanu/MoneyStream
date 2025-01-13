@@ -149,3 +149,9 @@ iframe {
 .load-more:hover {
   transform: translate(-50%, calc(-50% - 10px));
 }
+
+.main-select {
+  width: 50% !important;
+  margin: auto;
+  margin-bottom: 2.5rem;
+}
