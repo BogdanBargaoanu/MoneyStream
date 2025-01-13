@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const sendEmail = require('../emailService');
 
 /**
  * @openapi
@@ -217,8 +218,11 @@ router.post('/addPartner', function (req, res, next) {
         return;
     }
 
+    const email = req.body.email;
+    const name = req.body.username;
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(req.body.email)) {
+    if (!emailRegex.test(email)) {
         res.status(400).json({ success: false, error: 'Invalid email format!' });
         return;
     }
@@ -255,6 +259,14 @@ router.post('/addPartner', function (req, res, next) {
                         });
                     }
                     res.json({ success: true, message: 'Partner added successfully!' });
+
+                    // Send a welcome email
+                    sendEmail(
+                        email,
+                        'Welcome to MoneyStream',
+                        `Hello ${name}, welcome to MoneyStream!`,
+                        `<p>Hello ${name},</p><p>Welcome to MoneyStream!</p>`
+                    );
                 });
             });
         });
