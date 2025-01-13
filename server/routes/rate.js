@@ -508,6 +508,8 @@ router.delete('/delete', function (req, res, next) {
 
 router.get('/nearest', function (req, res, next) {
     const { latitude, longitude, page = 1 } = req.query;
+    const currencyId = req.query.currencyId || -1;
+    console.log("Getting nearest rates for currency:", currencyId);
     const limit = 5;
     const offset = (page - 1) * limit;
 
@@ -519,12 +521,19 @@ router.get('/nearest', function (req, res, next) {
     const query = `
         SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value,
         (6371 * acos(cos(radians(${latitude})) * cos(radians(location.latitude)) * cos(radians(location.longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(location.latitude)))) AS distance
+        FROM (
+        SELECT idLocation, MAX(date) AS latest_date
         FROM rate
-        INNER JOIN location ON rate.idLocation = location.idLocation
-        INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+        GROUP BY idLocation
+    ) AS latest_rates
+        INNER JOIN rate ON rate.idLocation = latest_rates.idLocation AND rate.date = latest_rates.latest_date
+		INNER JOIN location ON rate.idLocation = location.idLocation
+		INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+        WHERE rate.idCurrency = ${currencyId !== -1 ? currencyId : '(SELECT idCurrency FROM currency ORDER BY idCurrency ASC LIMIT 1)'}
         ORDER BY distance, rate.date DESC
         LIMIT ${limit} OFFSET ${offset}`;
 
+    console.log(query);
     req.db.query(query, (err, result) => {
         if (err) {
             res.status(500).json({ error: err.message, success: false });

@@ -12,15 +12,22 @@
     flex-shrink: 0;
 }
 
-.row-group {
+.row-group-rates {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row;
-    margin-top: -3rem;
     flex-shrink: 0;
+    font-size: 3vmin;
+    color: var(--button-color);
 }
 
 .space {
     margin-right: 1rem;
+}
+
+.main-select {
+    width: 50% !important;
+    margin: auto;
+    margin-bottom: 2.5rem;
 }

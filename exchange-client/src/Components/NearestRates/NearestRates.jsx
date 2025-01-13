@@ -13,22 +13,25 @@ const NearestRates = () => {
     const longitude = queryParams.get('lng');
 
     const [nearestRates, setNearestRates] = useState([]);
-    const [groupedRates, setGroupedRates] = useState([]);
+    const [currencies, setCurrencies] = useState([]);
+    const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
 
-    const fetchNearestRates = useCallback((latitude, longitude, page) => {
+    const fetchNearestRates = useCallback((latitude, longitude, page, currencyId) => {
         console.log('fetching nearest rates');
         axios.get(`http://localhost:3000/rate/nearest`, {
             params: {
                 latitude: latitude,
                 longitude: longitude,
-                page: page
+                page: page,
+                currencyId: currencyId
             },
         })
             .then(response => {
                 if (response.data.success) {
                     setNearestRates(prevRates => [...prevRates, ...response.data.result]);
+                    console.log('Fetched rates:', response.data.result);
                 }
                 else {
                     console.error('Failed to fetch rates');
@@ -39,27 +42,37 @@ const NearestRates = () => {
             });
     }, []);
 
-    useEffect(() => {
-        fetchNearestRates(latitude, longitude, currentPage); // Double fetch due to the React.StrictMode warning
-    }, [latitude, longitude, currentPage, fetchNearestRates]);
-
-    useEffect(() => {
-        // Group the rates by address
-        const groupByAddress = (rates) => {
-            return rates.reduce((acc, rate) => {
-                if (!acc[rate.address]) {
-                    acc[rate.address] = [];
+    const fetchCurrencies = () => {
+        axios.get('http://localhost:3000/currency/public')
+            .then(response => {
+                if (response.data.success) {
+                    setCurrencies(response.data.result);
                 }
-                acc[rate.address].push(rate);
-                return acc;
-            }, {});
-        };
+                else {
+                    console.error('Failed to fetch currencies');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    };
 
-        setGroupedRates(groupByAddress(nearestRates));
-    }, [nearestRates]);
+    useEffect(() => {
+        fetchCurrencies();
+    }, []);
+
+    useEffect(() => {
+        fetchNearestRates(latitude, longitude, currentPage, selectedCurrency); // Double fetch due to the React.StrictMode warning
+    }, [latitude, longitude, currentPage, selectedCurrency, fetchNearestRates]);
 
     const loadNewData = () => {
         setCurrentPage(currentPage + 1);
+    };
+
+    const handleCurrencyChange = (event) => {
+        setNearestRates([]);
+        setSelectedCurrency(event.target.value);
+        setCurrentPage(1);
     };
 
     const generateMapUrlFromAddress = (address) => {
@@ -84,31 +97,36 @@ const NearestRates = () => {
         <div className='container-nearest-rates'>
             <MdOutlineArrowBack className='home-button' onClick={navigateHome} />
             <h1 className='heading-nearest-rates'><ImLocation /> Nearest Rates</h1>
-            <div className='row-group'>
+            <div className='row-group-rates'>
                 <p className='space'>Latitude: {latitude}</p>
                 <p>Longitude: {longitude}</p>
             </div>
+            <select className='form-select main-select' onChange={handleCurrencyChange} value={selectedCurrency}>
+                {currencies.map(currency => (
+                    <option key={currency.idCurrency} value={currency.idCurrency}>
+                        {currency.name}
+                    </option>
+                ))}
+            </select>
             <div className='data-container'>
-                {Object.keys(groupedRates).length > 0 ? (
+                {nearestRates.length > 0 ? (
                     <ul>
-                        {Object.entries(groupedRates).map(([address, rates], index) => (
+                        {nearestRates.map((rate, index) => (
                             <div className='container-rate' key={index}>
-                                <h3>Address: {address}</h3>
+                                <h3>Address: {rate.address}</h3>
                                 <iframe
                                     width="80%"
                                     height="300px"
                                     loading="lazy"
                                     allowFullScreen
-                                    src={generateMapUrlFromAddress(address)}
+                                    src={generateMapUrlFromAddress(rate.address)}
                                 ></iframe>
                                 <ul>
-                                    {rates.map((rate, idx) => (
-                                        <li key={idx}>
-                                            <p>Currency: {rate.name}</p>
-                                            <p>Rate: {rate.value}</p>
-                                            <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
-                                        </li>
-                                    ))}
+                                    <li>
+                                        <p>Currency: {rate.name}</p>
+                                        <p>Rate: {rate.value}</p>
+                                        <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
+                                    </li>
                                 </ul>
                             </div>
                         ))}

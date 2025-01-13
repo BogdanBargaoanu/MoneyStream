@@ -1,13 +1,8 @@
 :root {
   --button-color: #7852DA;
   --button-color-text: #060b26;
-  --font-family: 'Roboto', sans-serif;
   --text-color: #03071b;
   --container-background: #cc00ff69;
-}
-
-* {
-  font-family: var(--font-family);
 }
 
 .App {
