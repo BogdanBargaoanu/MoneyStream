@@ -155,3 +155,13 @@ iframe {
   margin: auto;
   margin-bottom: 2.5rem;
 }
+
+.rate-text {
+  font-size: 3vmin;
+  margin: 1rem;
+  font-weight: 700;
+}
+
+.rate {
+  color: var(--text-color);
+}

@@ -123,7 +123,7 @@ const NearestRates = () => {
                                 ></iframe>
                                 <ul>
                                     <li>
-                                        <p className="rate-text">Rate: {rate.value}</p>
+                                        <p className="rate-text">Rate: <span className="rate">{rate.value}</span></p>
                                         <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
                                     </li>
                                 </ul>
