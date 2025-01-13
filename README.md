@@ -24,6 +24,7 @@ This repository contains three main components of the Exchange Rate Application:
   - Node.js
   - Express.js
   - MySQL
+  - SMTP
   - Swagger (OpenAPI) for API documentation
 
 - **Exchange Admin App**:
@@ -63,7 +64,16 @@ This repository contains three main components of the Exchange Rate Application:
    - Create a MySQL database and import the provided schema.
    - Update the database configuration in `server/app.js`.
 
-4. **Run the server**:
+4. **Environmental variables**:
+   - Create a `.env` file in the `server` directory.
+   - Enter your SMTP credentials.
+   
+   ```ini
+    SMTP_USER=your_email
+    SMTP_PASS=your_password
+   ```
+
+5. **Run the server**:
    ```bash
    npm start
    ```
@@ -111,6 +121,7 @@ This repository contains three main components of the Exchange Rate Application:
 
 ### Server App
  - API Security with JWT.
+ - SMTP implementation.
  > The server uses JSON Web Tokens (JWT) to secure the API endpoints.
  - Data Encryption
  > User passwords are hashed using MD5 before being stored in the database to ensure security.
