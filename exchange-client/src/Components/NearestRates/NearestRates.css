@@ -12,13 +12,14 @@
     flex-shrink: 0;
 }
 
-.row-group {
+.row-group-rates {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row;
-    margin-top: -3rem;
     flex-shrink: 0;
+    font-size: 3vmin;
+    color: var(--button-color);
 }
 
 .space {

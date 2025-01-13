@@ -8,15 +8,17 @@ import axios from 'axios';
 
 const BestRates = () => {
     const [nearestRates, setNearestRates] = useState([]);
-    const [groupedRates, setGroupedRates] = useState([]);
+    const [currencies, setCurrencies] = useState([]);
+    const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
 
-    const fetchBestRates = useCallback((page) => {
+    const fetchBestRates = useCallback((page, currencyId) => {
         console.log('fetching best rates');
         axios.get(`http://localhost:3000/rate/best`, {
             params: {
-                page: page
+                page: page,
+                currencyId: currencyId
             },
         })
             .then(response => {
@@ -32,27 +34,37 @@ const BestRates = () => {
             });
     }, []);
 
-    useEffect(() => {
-        fetchBestRates(currentPage); // Double fetch due to the React.StrictMode warning
-    }, [currentPage, fetchBestRates]);
-
-    useEffect(() => {
-        // Group the rates by address
-        const groupByAddress = (rates) => {
-            return rates.reduce((acc, rate) => {
-                if (!acc[rate.address]) {
-                    acc[rate.address] = [];
+    const fetchCurrencies = () => {
+        axios.get('http://localhost:3000/currency/public')
+            .then(response => {
+                if (response.data.success) {
+                    setCurrencies(response.data.result);
                 }
-                acc[rate.address].push(rate);
-                return acc;
-            }, {});
-        };
+                else {
+                    console.error('Failed to fetch currencies');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    };
 
-        setGroupedRates(groupByAddress(nearestRates));
-    }, [nearestRates]);
+    useEffect(() => {
+        fetchCurrencies();
+    }, []);
+
+    useEffect(() => {
+        fetchBestRates(currentPage, selectedCurrency); // Double fetch due to the React.StrictMode warning
+    }, [currentPage, selectedCurrency, fetchBestRates]);
 
     const loadNewData = () => {
         setCurrentPage(currentPage + 1);
+    };
+
+    const handleCurrencyChange = (event) => {
+        setNearestRates([]);
+        setSelectedCurrency(event.target.value);
+        setCurrentPage(1);
     };
 
     const generateMapUrlFromAddress = (address) => {
@@ -77,27 +89,31 @@ const BestRates = () => {
         <div className='container-best-rates'>
             <MdOutlineArrowBack className='home-button' onClick={navigateHome} />
             <h1 className='heading-best-rates'><MdOutlineVerified /> Best Rates</h1>
+            <select className='form-select main-select' onChange={handleCurrencyChange} value={selectedCurrency}>
+                {currencies.map(currency => (
+                    <option key={currency.idCurrency} value={currency.idCurrency}>
+                        {currency.name}
+                    </option>
+                ))}
+            </select>
             <div className='data-container'>
-                {Object.keys(groupedRates).length > 0 ? (
+                {nearestRates.length > 0 ? (
                     <ul>
-                        {Object.entries(groupedRates).map(([address, rates], index) => (
+                        {nearestRates.map((rate, index) => (
                             <div className='container-rate' key={index}>
-                                <h3>Address: {address}</h3>
+                                <h3>Address: {rate.address}</h3>
                                 <iframe
                                     width="80%"
                                     height="300px"
                                     loading="lazy"
                                     allowFullScreen
-                                    src={generateMapUrlFromAddress(address)}
+                                    src={generateMapUrlFromAddress(rate.address)}
                                 ></iframe>
                                 <ul>
-                                    {rates.map((rate, idx) => (
-                                        <li key={idx}>
-                                            <p>Currency: {rate.name}</p>
-                                            <p>Rate: {rate.value}</p>
-                                            <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
-                                        </li>
-                                    ))}
+                                    <li>
+                                        <p className="rate-text">Rate: <span className="rate">{rate.value}</span></p>
+                                        <p>Date: {new Date(rate.date).toLocaleDateString()}</p>
+                                    </li>
                                 </ul>
                             </div>
                         ))}
