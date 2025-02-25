@@ -5,15 +5,17 @@ import { Link } from 'react-router-dom';
 import { NavbarData } from './NavbarData';
 import './Navbar.css';
 import { IconContext } from 'react-icons';
+import { useNavigate } from 'react-router-dom';
 
 function Navbar() {
   const [sidebar, setSidebar] = useState(false);
+  const navigate = useNavigate();
 
   const showSidebar = () => setSidebar(!sidebar);
 
   const logout = () => {
     localStorage.removeItem('user-token');
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import { Chart } from 'react-google-charts';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const Dashboard = () => {
     const [rates, setRates] = useState([]);
@@ -9,6 +11,7 @@ const Dashboard = () => {
     const [currencies, setCurrencies] = useState([]);
     const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchCurrencies();
@@ -46,6 +49,10 @@ const Dashboard = () => {
             .catch(error => {
                 console.error('Failed to fetch rates:', error);
                 setIsLoading(false);
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             })
     };
 
@@ -63,17 +70,13 @@ const Dashboard = () => {
                 }
                 else {
                     console.error('Failed to fetch currencies');
-                    if (response?.data?.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
                 }
             })
             .catch(error => {
                 console.error(error);
-                if (error.response?.data?.error === 'No authorization header') {
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
                     localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
+                    navigate('/login');
                 }
             });
     };

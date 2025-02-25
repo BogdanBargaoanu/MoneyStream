@@ -117,7 +117,7 @@ db.connect((err) => {
                               REFERENCES currency (idCurrency)
                               ON DELETE CASCADE
                               ON UPDATE NO ACTION)`;
-        var createTransactionsTable = `CREATE TABLE IF NOT EXISTS transactions (
+        var createTransactionsTable = `CREATE TABLE IF NOT EXISTS transaction (
                                       idTransaction INT NOT NULL AUTO_INCREMENT,
                                       idRate INT NOT NULL,
                                       idPartnerRate INT NULL,

@@ -258,7 +258,7 @@ router.post('/addPartner', function (req, res, next) {
                             res.status(500).json({ success: false, error: err.message });
                         });
                     }
-                    res.json({ success: true, message: 'Partner added successfully!' });
+                    res.status(201).json({ success: true, message: 'Partner added successfully!' });
 
                     // HTML content for the email
                     const htmlContent = `

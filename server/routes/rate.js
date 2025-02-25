@@ -199,7 +199,7 @@ router.post('/insert', function (req, res, next) {
                         res.status(500).json({ error: err.message, success: false });
                     });
                 }
-                res.json({ message: 'Rate added successfully!', success: true });
+                res.status(201).json({ message: 'Rate added successfully!', success: true });
             });
         });
     });

@@ -3,6 +3,8 @@ import './Locations.css'
 import { useTable } from 'react-table'
 import { useToast } from '../../Context/Toast/ToastContext';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const Locations = () => {
     const [locations, setLocations] = useState([]);
@@ -18,6 +20,7 @@ const Locations = () => {
         information: ''
     });
     const { showToastMessage } = useToast();
+    const navigate = useNavigate();
 
     const fetchLocations = () => {
         const token = localStorage.getItem('user-token');
@@ -34,18 +37,16 @@ const Locations = () => {
                 }
                 else {
                     console.error('Failed to fetch locations');
-                    if (response?.data?.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to fetch locations' + (response?.data?.error || 'Unknown error'));
                 }
 
             })
             .catch(error => {
+                showToastMessage('Failed to fetch locations: ' + (error.response?.data?.error || 'Unknown error'));
                 console.error(error);
-                if (error.response.error === 'No authorization header') {
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
                     localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
+                    navigate('/login');
                 }
             });
     };
@@ -117,18 +118,14 @@ const Locations = () => {
                     resetLocation();
                 } else {
                     console.error('Failed to insert location');
-                    showToastMessage('Failed to insert location');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to insert location:' + (response?.data?.error || 'Unknown error'));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not insert location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
                     localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
+                    navigate('/login');
                 }
             });
     };
@@ -170,14 +167,14 @@ const Locations = () => {
                     ));
                 } else {
                     console.error('Failed to update location');
-                    showToastMessage('Failed to update location');
+                    showToastMessage('Failed to update location' + (response?.data?.error || 'Unknown error'));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not update location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
                     localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
+                    navigate('/login');
                 }
             });
     };
@@ -199,18 +196,14 @@ const Locations = () => {
                     setFilteredLocations(filteredLocations.filter(l => l.idLocation !== location.idLocation));
                 } else {
                     console.error('Failed to delete location');
-                    showToastMessage('Failed to delete location');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to delete location' + (response?.data?.error || 'Unknown error'));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not delete location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
                     localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
+                    navigate('/login');
                 }
             })
     };

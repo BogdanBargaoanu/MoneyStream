@@ -5,6 +5,7 @@ import user_icon from '../Assets/person.png'
 import password_icon from '../Assets/password.png'
 import email_icon from '../Assets/email.png'
 import { useToast } from "../../Context/Toast/ToastContext"
+import { useNavigate } from "react-router-dom"
 
 const LoginPage = () => {
     const [action, setAction] = useState("Login");
@@ -12,6 +13,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const { showToastMessage } = useToast();
+    const navigate = useNavigate();
 
     const handleLogin = () => {
         axios.post('http://localhost:3000/partner/login', {
@@ -22,7 +24,7 @@ const LoginPage = () => {
                 if (response.data.success) {
                     // The login was successful
                     localStorage.setItem('user-token', response.data.token);
-                    window.location.href = '/dashboard';
+                    navigate('/dashboard');
                 }
             })
             .catch(error => {
