@@ -6,6 +6,7 @@ import Partners from './Components/Partners/Partners';
 import Locations from './Components/Locations/Locations';
 import Currency from './Components/Currency/Currency';
 import Rates from './Components/Rates/Rates';
+import Transactions from './Components/Transactions/Transactions';
 import PrivateRoute from './PrivateRoute';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -44,6 +45,7 @@ function AppContent() {
         <Route path="/locations" element={<PrivateRoute component={Locations} />} />
         <Route path="/currency" element={<PrivateRoute component={Currency} />} />
         <Route path="/rates" element={<PrivateRoute component={Rates} />} />
+        <Route path="/transactions" element={<PrivateRoute component={Transactions} />} />
       </Routes>
     </>
   );
