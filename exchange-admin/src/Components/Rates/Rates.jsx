@@ -3,6 +3,7 @@ import './Rates.css'
 import { useTable } from 'react-table'
 import { useToast } from '../../Context/Toast/ToastContext';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Rates = () => {
     const [rates, setRates] = useState([]);
@@ -19,6 +20,7 @@ const Rates = () => {
         value: null
     });
     const { showToastMessage } = useToast();
+    const navigate = useNavigate();
 
     const fetchRates = () => {
         const token = localStorage.getItem('user-token');
@@ -34,21 +36,15 @@ const Rates = () => {
                 }
                 else {
                     console.error('Failed to fetch rates');
-                    showToastMessage('Failed to fetch rates');
-                    if (response?.data?.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.rate.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to fetch rates' + (response?.data?.error || ''));
                 }
 
             })
             .catch(error => {
                 console.error(error);
                 showToastMessage('Failed to fetch rates: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.rate.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -66,21 +62,14 @@ const Rates = () => {
                 }
                 else {
                     console.error('Failed to fetch currencies');
-                    showToastMessage('Failed to fetch currencies');
-                    if (response?.data?.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to fetch currencies' + (response?.data?.error || ''));
                 }
 
             })
             .catch(error => {
                 console.error(error);
-                showToastMessage('Failed to fetch currencies: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -97,20 +86,14 @@ const Rates = () => {
                     setLocations(response.data.result);
                 }
                 else {
-                    console.error('Failed to fetch locations');
-                    if (response?.data?.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    console.error('Failed to fetch locations' + (response?.data?.error || ''));
                 }
 
             })
             .catch(error => {
                 console.error(error);
-                if (error.response.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -164,19 +147,13 @@ const Rates = () => {
                     resetRate();
                 } else {
                     console.error('Failed to insert rate');
-                    showToastMessage('Failed to insert rate');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.rate.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to insert rate' + (response?.data?.error || ''));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not insert rate: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.rate.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -211,15 +188,13 @@ const Rates = () => {
                     fetchRates();
                 } else {
                     console.error('Failed to update rate');
-                    showToastMessage('Failed to update rate');
+                    showToastMessage('Failed to update rate' + (response?.data?.error || ''));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not update rate: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.rate.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -239,19 +214,13 @@ const Rates = () => {
                     fetchRates();
                 } else {
                     console.error('Failed to delete rate');
-                    showToastMessage('Failed to delete rate');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.rate.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to delete rate' + (response?.data?.error || ''));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not delete rate: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.rate.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             })
     };
 
