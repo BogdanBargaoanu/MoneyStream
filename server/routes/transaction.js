@@ -104,4 +104,96 @@ router.get('/', function (req, res, next) {
     });
 });
 
+/**
+ * @openapi
+ * /transaction:
+ *   post:
+ *     tags:
+ *       - transaction
+ *     description: Create a new transaction
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - idRate
+ *               - value
+ *             properties:
+ *               idRate:
+ *                 type: integer
+ *                 description: ID of the main rate
+ *               idPartnerRate:
+ *                 type: integer
+ *                 nullable: true
+ *                 description: ID of the partner rate (optional)
+ *               value:
+ *                 type: number
+ *                 format: double
+ *                 description: Transaction value
+ *     responses:
+ *       201:
+ *         description: Transaction created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 success:
+ *                   type: boolean
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+router.post('/', function (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'No authorization header', success: false });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        jwt.verify(token, 'exchange-secret-key');
+    } catch (err) {
+        return res.status(401).json({ error: 'Invalid token', success: false });
+    }
+
+    const { idRate, idPartnerRate, value } = req.body;
+    if (!idRate || !value) {
+        return res.status(400).json({ error: 'Missing required fields', success: false });
+    }
+
+    const query = `INSERT INTO transaction (idRate, idPartnerRate, value) VALUES (?, ?, ?)`;
+    req.db.beginTransaction((err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message, success: false });
+        }
+        req.db.query(query, [idRate, idPartnerRate || null, value], (err, result) => {
+            if (err) {
+                return req.db.rollback(() => {
+                    res.status(500).json({ error: err.message, success: false });
+                });
+            }
+            req.db.commit((err) => {
+                if (err) {
+                    return req.db.rollback(() => {
+                        res.status(500).json({ error: err.message, success: false });
+                    });
+                }
+                res.status(201).json({ id: result.insertId, success: true });
+            });
+        });
+    })
+});
+
+
 module.exports = router;

@@ -28,7 +28,7 @@ export const NavbarData = [
     path: '/currency',
     icon: <FaIcons.FaMoneyBillWave />,
     cName: 'nav-text'
-  }, 
+  },
   {
     title: 'Rates',
     path: '/rates',
