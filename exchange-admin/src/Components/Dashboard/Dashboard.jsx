@@ -43,14 +43,14 @@ const Dashboard = () => {
                     setRates(response.data.result);
                 } else {
                     console.error('Failed to fetch rates');
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
                 }
                 setIsLoading(false);
             })
             .catch(error => {
                 console.error('Failed to fetch rates:', error);
                 setIsLoading(false);
+                localStorage.removeItem('user-token');
+                navigate('/login');
             })
     };
 
@@ -68,18 +68,12 @@ const Dashboard = () => {
                 }
                 else {
                     console.error('Failed to fetch currencies');
-                    if (response?.data?.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        navigate('/login');
-                    }
                 }
             })
             .catch(error => {
                 console.error(error);
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 

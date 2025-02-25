@@ -37,20 +37,15 @@ const Locations = () => {
                 }
                 else {
                     console.error('Failed to fetch locations');
-                    showToastMessage('Failed to fetch locations');
-                    if (response?.data?.error === 'No authorization header' || response?.data?.error === 'Invalid token') {
-                        localStorage.removeItem('user-token');
-                        navigate('/login');
-                    }
+                    showToastMessage('Failed to fetch locations' + (response?.data?.error || 'Unknown error'));
                 }
 
             })
             .catch(error => {
+                showToastMessage('Failed to fetch locations: ' + (error.response?.data?.error || 'Unknown error'));
                 console.error(error);
-                if (error.response.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -121,19 +116,13 @@ const Locations = () => {
                     resetLocation();
                 } else {
                     console.error('Failed to insert location');
-                    showToastMessage('Failed to insert location');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        navigate('/login');
-                    }
+                    showToastMessage('Failed to insert location:' + (response?.data?.error || 'Unknown error'));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not insert location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -174,15 +163,13 @@ const Locations = () => {
                     ));
                 } else {
                     console.error('Failed to update location');
-                    showToastMessage('Failed to update location');
+                    showToastMessage('Failed to update location' + (response?.data?.error || 'Unknown error'));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not update location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -203,19 +190,13 @@ const Locations = () => {
                     setFilteredLocations(filteredLocations.filter(l => l.idLocation !== location.idLocation));
                 } else {
                     console.error('Failed to delete location');
-                    showToastMessage('Failed to delete location');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        navigate('/login');
-                    }
+                    showToastMessage('Failed to delete location' + (response?.data?.error || 'Unknown error'));
                 }
             })
             .catch(error => {
                 showToastMessage('Could not delete location: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             })
     };
 

@@ -95,7 +95,7 @@ const Currency = () => {
                     setId(null);
                 } else {
                     console.error('Failed to insert currency');
-                    showToastMessage('Failed to insert currency' + response?.data?.error || 'Unknown error');
+                    showToastMessage('Failed to insert currency:' + response?.data?.error || 'Unknown error');
                 }
             })
             .catch(error => {
@@ -136,7 +136,7 @@ const Currency = () => {
                     setId(null);
                 } else {
                     console.error('Failed to update currency');
-                    showToastMessage('Failed to update currency' + response?.data?.error || 'Unknown error');
+                    showToastMessage('Failed to update currency:' + response?.data?.error || 'Unknown error');
                 }
             })
             .catch(error => {
@@ -165,7 +165,7 @@ const Currency = () => {
                     filter(searchValue);
                 } else {
                     console.error('Failed to delete currency');
-                    showToastMessage('Failed to delete currency' + response?.data?.error || 'Unknown error');
+                    showToastMessage('Failed to delete currency:' + response?.data?.error || 'Unknown error');
                 }
             })
             .catch(error => {
