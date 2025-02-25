@@ -49,7 +49,22 @@ const jwt = require('jsonwebtoken');
  *                 success:
  *                   type: boolean
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 router.get('/', function (req, res, next) {
     const authHeader = req.headers.authorization;
@@ -147,11 +162,35 @@ router.get('/', function (req, res, next) {
  *                 success:
  *                   type: boolean
  *       400:
- *         description: Invalid input
+ *         description: Error caused by an inappropriate input.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
  *       401:
  *         description: Unauthorized
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 router.post('/', function (req, res, next) {
@@ -195,5 +234,101 @@ router.post('/', function (req, res, next) {
     })
 });
 
+/**
+ * @openapi
+ * /transaction/delete:
+ *   delete:
+ *     tags:
+ *       - transaction
+ *     description: Delete a transaction by ID
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               idTransaction:
+ *                 type: integer
+ *                 description: The ID of the transaction to delete.
+ *     responses:
+ *       200:
+ *         description: Transaction deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Transaction not found
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+router.delete('/delete', function (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'No authorization header', success: false });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        jwt.verify(token, 'exchange-secret-key');
+    } catch (err) {
+        return res.status(401).json({ error: 'Invalid token', success: false });
+    }
+
+    const transactionId = parseInt(req.body.idTransaction);
+    if (isNaN(transactionId)) {
+        return res.status(400).json({ error: 'Invalid transaction ID', success: false });
+    }
+
+    const query = `DELETE FROM transaction WHERE idTransaction = ?`;
+
+    req.db.beginTransaction((err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message, success: false });
+        }
+
+        req.db.query(query, [transactionId], (err, result) => {
+            if (err) {
+                return res.status(500).json({ error: err.message, success: false });
+            }
+
+            req.db.commit((err) => {
+                if (err) {
+                    return req.db.rollback(() => {
+                        res.status(500).json({ error: err.message, success: false });
+                    });
+                }
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: 'Transaction not found', success: false });
+                }
+                res.json({ message: 'Transaction deleted successfully!', success: true });
+            });
+        });
+    });
+});
 
 module.exports = router;
