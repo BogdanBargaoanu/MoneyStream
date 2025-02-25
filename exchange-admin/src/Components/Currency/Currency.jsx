@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useTable } from 'react-table'
 import './Currency.css'
 import { useToast } from '../../Context/Toast/ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 const Currency = () => {
     const [currencies, setCurrencies] = useState([]);
@@ -13,6 +14,7 @@ const Currency = () => {
     const [id, setId] = useState(null);
     const [isFormValidState, setIsFormValidState] = useState(false); // State to track form validity
     const { showToastMessage } = useToast();
+    const navigate = useNavigate();
 
     const fetchCurrencies = () => {
         const token = localStorage.getItem('user-token');
@@ -29,21 +31,15 @@ const Currency = () => {
                 }
                 else {
                     console.error('Failed to fetch currencies');
-                    showToastMessage('Failed to fetch currencies');
-                    if (response?.data?.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to fetch currencies' + response?.data?.error || 'Unknown error');
                 }
 
             })
             .catch(error => {
                 console.error(error);
                 showToastMessage('Failed to fetch currencies: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -99,19 +95,13 @@ const Currency = () => {
                     setId(null);
                 } else {
                     console.error('Failed to insert currency');
-                    showToastMessage('Failed to insert currency');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to insert currency' + response?.data?.error || 'Unknown error');
                 }
             })
             .catch(error => {
                 showToastMessage('Could not insert currency: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -146,15 +136,13 @@ const Currency = () => {
                     setId(null);
                 } else {
                     console.error('Failed to update currency');
-                    showToastMessage('Failed to update currency');
+                    showToastMessage('Failed to update currency' + response?.data?.error || 'Unknown error');
                 }
             })
             .catch(error => {
                 showToastMessage('Could not update currency: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             });
     };
 
@@ -177,19 +165,13 @@ const Currency = () => {
                     filter(searchValue);
                 } else {
                     console.error('Failed to delete currency');
-                    showToastMessage('Failed to delete currency');
-                    if (response.data.error === 'No authorization header') {
-                        localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
-                    }
+                    showToastMessage('Failed to delete currency' + response?.data?.error || 'Unknown error');
                 }
             })
             .catch(error => {
                 showToastMessage('Could not delete currency: ' + (error.response?.data?.error || 'Unknown error'));
-                if (error.response?.data?.error === 'No authorization header') {
-                    localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
-                }
+                localStorage.removeItem('user-token');
+                navigate('/login');
             })
     };
 

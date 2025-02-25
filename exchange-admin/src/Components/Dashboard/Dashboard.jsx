@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import { Chart } from 'react-google-charts';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const Dashboard = () => {
     const [rates, setRates] = useState([]);
@@ -9,6 +11,7 @@ const Dashboard = () => {
     const [currencies, setCurrencies] = useState([]);
     const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchCurrencies();
@@ -40,6 +43,8 @@ const Dashboard = () => {
                     setRates(response.data.result);
                 } else {
                     console.error('Failed to fetch rates');
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
                 }
                 setIsLoading(false);
             })
@@ -65,7 +70,7 @@ const Dashboard = () => {
                     console.error('Failed to fetch currencies');
                     if (response?.data?.error === 'No authorization header') {
                         localStorage.removeItem('user-token');
-                        window.location.href = '/dashboard';
+                        navigate('/login');
                     }
                 }
             })
@@ -73,7 +78,7 @@ const Dashboard = () => {
                 console.error(error);
                 if (error.response?.data?.error === 'No authorization header') {
                     localStorage.removeItem('user-token');
-                    window.location.href = '/dashboard';
+                    navigate('/login');
                 }
             });
     };
