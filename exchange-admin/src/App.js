@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import LoginPage from './Components/Login/LoginPage';
 import Dashboard from './Components/Dashboard/Dashboard';
@@ -27,7 +27,7 @@ function App() {
 }
 
 function AppContent() {
-  const location = window.location;
+  const location = useLocation();
 
   return (
     <>
