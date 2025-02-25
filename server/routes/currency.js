@@ -243,7 +243,7 @@ router.post('/insert', function (req, res, next) {
               res.status(500).json({ error: err.message, success: false });
             });
           }
-          res.json({ message: 'Currency added successfully!', success: true });
+          res.status(201).json({ message: 'Currency added successfully!', success: true });
         });
       });
     });
