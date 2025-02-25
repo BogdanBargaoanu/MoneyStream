@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
+require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -11,6 +12,7 @@ var partnerRouter = require('./routes/partner');
 var currencyRouter = require('./routes/currency');
 var locationRouter = require('./routes/location');
 var rateRouter = require('./routes/rate');
+var transactionRouter = require('./routes/transaction');
 
 var app = express();
 
@@ -41,9 +43,9 @@ app.use('/api', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 const mysql = require('mysql');
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'c4shfl0w4pp',
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASS
 });
 
 db.connect((err) => {
@@ -114,7 +116,27 @@ db.connect((err) => {
                               FOREIGN KEY (idCurrency)
                               REFERENCES currency (idCurrency)
                               ON DELETE CASCADE
-                              ON UPDATE NO ACTION)`
+                              ON UPDATE NO ACTION)`;
+        var createTransactionsTable = `CREATE TABLE IF NOT EXISTS transactions (
+                                      idTransaction INT NOT NULL AUTO_INCREMENT,
+                                      idRate INT NOT NULL,
+                                      idPartnerRate INT NULL,
+                                      value DECIMAL(10,6) NOT NULL,
+                                      PRIMARY KEY (idTransaction),
+                                      UNIQUE INDEX idTransaction_UNIQUE (idTransaction ASC) VISIBLE,
+                                      INDEX FK_RateTransaction_idx (idRate ASC) VISIBLE,
+                                      INDEX FK_PartnerRateTransaction_idx (idPartnerRate ASC) VISIBLE,
+                                      CONSTRAINT FK_RateTransaction
+                                        FOREIGN KEY (idRate)
+                                        REFERENCES rate (idRates)
+                                        ON DELETE CASCADE
+                                        ON UPDATE NO ACTION,
+                                      CONSTRAINT FK_PartnerRateTransaction
+                                        FOREIGN KEY (idPartnerRate)
+                                        REFERENCES rate (idRates)
+                                        ON DELETE CASCADE
+                                        ON UPDATE NO ACTION);
+`
         db.query(createPartnerTable, (err, result) => {
           if (err) {
             console.log(err);
@@ -147,6 +169,14 @@ db.connect((err) => {
             console.log('Rate table checked/created successfully.');
           }
         });
+        db.query(createTransactionsTable, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Transactions table checked/created successfully.');
+          }
+        });
       });
     });
   }
@@ -175,6 +205,7 @@ app.use('/partner', partnerRouter);
 app.use('/currency', currencyRouter);
 app.use('/location', locationRouter);
 app.use('/rate', rateRouter);
+app.use('/transaction', transactionRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
