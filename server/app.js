@@ -114,7 +114,27 @@ db.connect((err) => {
                               FOREIGN KEY (idCurrency)
                               REFERENCES currency (idCurrency)
                               ON DELETE CASCADE
-                              ON UPDATE NO ACTION)`
+                              ON UPDATE NO ACTION)`;
+        var createTransactionsTable = `CREATE TABLE IF NOT EXISTS transactions (
+                                      idTransaction INT NOT NULL AUTO_INCREMENT,
+                                      idRate INT NOT NULL,
+                                      idPartnerRate INT NULL,
+                                      value DECIMAL(10,6) NOT NULL,
+                                      PRIMARY KEY (idTransaction),
+                                      UNIQUE INDEX idTransaction_UNIQUE (idTransaction ASC) VISIBLE,
+                                      INDEX FK_RateTransaction_idx (idRate ASC) VISIBLE,
+                                      INDEX FK_PartnerRateTransaction_idx (idPartnerRate ASC) VISIBLE,
+                                      CONSTRAINT FK_RateTransaction
+                                        FOREIGN KEY (idRate)
+                                        REFERENCES rate (idRates)
+                                        ON DELETE CASCADE
+                                        ON UPDATE NO ACTION,
+                                      CONSTRAINT FK_PartnerRateTransaction
+                                        FOREIGN KEY (idPartnerRate)
+                                        REFERENCES rate (idRates)
+                                        ON DELETE CASCADE
+                                        ON UPDATE NO ACTION);
+`
         db.query(createPartnerTable, (err, result) => {
           if (err) {
             console.log(err);
@@ -145,6 +165,14 @@ db.connect((err) => {
           }
           else {
             console.log('Rate table checked/created successfully.');
+          }
+        });
+        db.query(createTransactionsTable, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Transactions table checked/created successfully.');
           }
         });
       });
