@@ -1,6 +1,8 @@
 import React from 'react';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
+import { MdCurrencyExchange } from "react-icons/md";
+
 
 export const NavbarData = [
   {
@@ -31,6 +33,12 @@ export const NavbarData = [
     title: 'Rates',
     path: '/rates',
     icon: <FaIcons.FaExchangeAlt />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Transactions',
+    path: '/transactions',
+    icon: <MdCurrencyExchange />,
     cName: 'nav-text'
   }
 ];
