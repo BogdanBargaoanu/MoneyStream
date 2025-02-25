@@ -49,8 +49,10 @@ const Dashboard = () => {
             .catch(error => {
                 console.error('Failed to fetch rates:', error);
                 setIsLoading(false);
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             })
     };
 
@@ -72,8 +74,10 @@ const Dashboard = () => {
             })
             .catch(error => {
                 console.error(error);
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 

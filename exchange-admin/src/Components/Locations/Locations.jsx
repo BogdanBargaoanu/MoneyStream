@@ -44,8 +44,10 @@ const Locations = () => {
             .catch(error => {
                 showToastMessage('Failed to fetch locations: ' + (error.response?.data?.error || 'Unknown error'));
                 console.error(error);
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -121,8 +123,10 @@ const Locations = () => {
             })
             .catch(error => {
                 showToastMessage('Could not insert location: ' + (error.response?.data?.error || 'Unknown error'));
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -168,8 +172,10 @@ const Locations = () => {
             })
             .catch(error => {
                 showToastMessage('Could not update location: ' + (error.response?.data?.error || 'Unknown error'));
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -195,8 +201,10 @@ const Locations = () => {
             })
             .catch(error => {
                 showToastMessage('Could not delete location: ' + (error.response?.data?.error || 'Unknown error'));
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             })
     };
 

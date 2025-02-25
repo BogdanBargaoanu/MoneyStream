@@ -43,8 +43,10 @@ const Rates = () => {
             .catch(error => {
                 console.error(error);
                 showToastMessage('Failed to fetch rates: ' + (error.response?.data?.error || 'Unknown error'));
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -68,8 +70,10 @@ const Rates = () => {
             })
             .catch(error => {
                 console.error(error);
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -92,8 +96,10 @@ const Rates = () => {
             })
             .catch(error => {
                 console.error(error);
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -152,8 +158,10 @@ const Rates = () => {
             })
             .catch(error => {
                 showToastMessage('Could not insert rate: ' + (error.response?.data?.error || 'Unknown error'));
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -193,8 +201,10 @@ const Rates = () => {
             })
             .catch(error => {
                 showToastMessage('Could not update rate: ' + (error.response?.data?.error || 'Unknown error'));
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             });
     };
 
@@ -219,8 +229,10 @@ const Rates = () => {
             })
             .catch(error => {
                 showToastMessage('Could not delete rate: ' + (error.response?.data?.error || 'Unknown error'));
-                localStorage.removeItem('user-token');
-                navigate('/login');
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
             })
     };
 
