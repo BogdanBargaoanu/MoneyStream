@@ -12,7 +12,7 @@ const AllRates = () => {
 
     const fetchAllRates = () => {
         console.log('fetching nearest rates');
-        axios.get(`http://localhost:3000/rate/allRates`)
+        axios.get(`http://127.0.0.1:3000/rate/allRates`)
             .then(response => {
                 if (response.data.success) {
                     setAllRates(response.data.result);

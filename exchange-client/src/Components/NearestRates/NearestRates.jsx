@@ -20,7 +20,7 @@ const NearestRates = () => {
 
     const fetchNearestRates = useCallback((latitude, longitude, page, currencyId) => {
         console.log('fetching nearest rates');
-        axios.get(`http://localhost:3000/rate/nearest`, {
+        axios.get(`http://127.0.0.1:3000/rate/nearest`, {
             params: {
                 latitude: latitude,
                 longitude: longitude,
@@ -43,7 +43,7 @@ const NearestRates = () => {
     }, []);
 
     const fetchCurrencies = () => {
-        axios.get('http://localhost:3000/currency/public')
+        axios.get('http://127.0.0.1:3000/currency/public')
             .then(response => {
                 if (response.data.success) {
                     setCurrencies(response.data.result);
