@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import './Transactions.css'
 import { useToast } from '../../Context/Toast/ToastContext';
@@ -8,6 +8,7 @@ import DataTable from '../DataTable/DataTable';
 const Transactions = () => {
     const [transactions, setTransactions] = useState([]);
     const [rates, setRates] = useState([]);
+    const [partnerRates, setPartnerRates] = useState([]);
     const [partners, setPartners] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
     const [isFormValidState, setIsFormValidState] = useState(false);
@@ -50,9 +51,10 @@ const Transactions = () => {
             });
     }
 
-    const fetchRates = () => {
+    const fetchRates = useCallback((idPartner) => {
+        const url = idPartner ? `http://localhost:3000/rate/${idPartner}` : `http://localhost:3000/rate`;
         const token = localStorage.getItem('user-token');
-        axios.get(`http://localhost:3000/rate`,
+        axios.get(url,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
@@ -60,7 +62,12 @@ const Transactions = () => {
             })
             .then(response => {
                 if (response.data.success) {
-                    setRates(response.data.result);
+                    if (idPartner) {
+                        setPartnerRates(response.data.result);
+                    }
+                    else {
+                        setRates(response.data.result);
+                    }
                 }
                 else {
                     console.error('Failed to fetch rates');
@@ -76,15 +83,12 @@ const Transactions = () => {
                     navigate('/login');
                 }
             });
-    };
+    }, [currentTransaction.idPartner]);
 
     useEffect(() => {
         fetchTransactions();
         setIsLoading(false);
     }, []);
-
-    const fetchPartnerRates = (idPartner) => {
-    };
 
     const fetchPartners = () => {
         axios.get('http://localhost:3000/partner')
@@ -117,6 +121,7 @@ const Transactions = () => {
             idPartner: null,
             transactionValue: null,
         });
+        setPartnerRates([]);
     };
 
     const handleInsertClick = async () => {
@@ -124,6 +129,40 @@ const Transactions = () => {
         fetchRates();
         fetchPartners();
         resetTransaction();
+    };
+
+    const insertRate = () => {
+        const token = localStorage.getItem('user-token');
+        console.log(currentTransaction);
+        axios.post('http://localhost:3000/transaction', {
+            idRate: currentTransaction.idRate,
+            idPartnerRate: currentTransaction.idPartnerRate,
+            value: currentTransaction.transactionValue
+        },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}` // send the token in the Authorization header
+                }
+            })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Transaction inserted successfully');
+                    fetchTransactions();
+                }
+                else {
+                    console.error('Failed to insert transaction');
+                    showToastMessage('Failed to insert transaction' + (response?.data?.error || ''));
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+                showToastMessage('Failed to insert transaction: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
+            });
     };
 
     const deleteTransaction = (transaction) => {
@@ -156,6 +195,26 @@ const Transactions = () => {
                     navigate('/login');
                 }
             });
+    };
+
+    const isFormValid = () => {
+        if (!currentTransaction.idRate) {
+            showToastMessage('Rate is required');
+            return false;
+        }
+        if (!currentTransaction.idPartnerRate) {
+            showToastMessage('Partner rate is required');
+            return false;
+        }
+        if (currentTransaction.transactionValue === null) {
+            showToastMessage('Value is required');
+            return false;
+        }
+        return true;
+    };
+
+    const validate = () => {
+        setIsFormValidState(currentTransaction.idRate && currentTransaction.idPartnerRate && currentTransaction.transactionValue !== null);
     };
 
     const columns = React.useMemo(
@@ -217,9 +276,9 @@ const Transactions = () => {
 
     return (
         <div>
-            <div class="input-group mb-3 search-box">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">@</span>
+            <div className="input-group mb-3 search-box">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="basic-addon1">@</span>
                 </div>
                 <input
                     className='form-control'
@@ -231,7 +290,7 @@ const Transactions = () => {
                 />
             </div>
             <DataTable columns={columns} data={transactions} isLoading={isLoading} />
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-transaction">
+            <button onClick={() => handleInsertClick()} type="button" className="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-transaction">
                 Insert
             </button>
             <div id="modal-transaction" className='modal' tabIndex="-1">
@@ -245,17 +304,17 @@ const Transactions = () => {
                             <select
                                 className="form-control transaction-input"
                                 value={currentTransaction.idRate || ''}
-                                onChange={(e) => setCurrentTransaction({ ...currentTransaction, idRate: e.target.value })}
+                                onChange={(e) => { setCurrentTransaction({ ...currentTransaction, idRate: parseInt(e.target.value) }); validate(); }}
                             >
                                 <option value="" disabled>Select Rate</option>
                                 {rates.map(rate => (
-                                    <option key={rate.idRate} value={rate.idRate}>{rate.name}, {rate.value}, {rate.address}</option>
+                                    <option key={rate.idRates} value={rate.idRates}>{rate.name}, {rate.value}, {rate.address}</option>
                                 ))}
                             </select>
                             <select
                                 className="form-control transaction-input"
                                 value={currentTransaction.idPartner || ''}
-                                onChange={(e) => {setCurrentTransaction({ ...currentTransaction, idPartner: e.target.value }); fetchPartnerRates(e.target.value)}}
+                                onChange={(e) => { setCurrentTransaction({ ...currentTransaction, idPartner: e.target.value }); fetchRates(e.target.value); validate(); }}
                             >
                                 <option value="" disabled>Select Partner</option>
                                 {partners.map(partner => (
@@ -265,9 +324,20 @@ const Transactions = () => {
                             <select
                                 className="form-control transaction-input"
                                 value={currentTransaction.idPartnerRate || ''}
+                                onChange={(e) => { setCurrentTransaction({ ...currentTransaction, idPartnerRate: parseInt(e.target.value) }); validate(); }}
                             >
                                 <option value="" disabled>Select Partner Rate</option>
+                                {partnerRates.map(rate => (
+                                    <option key={rate.idRates} value={rate.idRates}>{rate.name}, {rate.value}, {rate.address}</option>
+                                ))}
                             </select>
+                            <input
+                                type="number"
+                                className="form-control transaction-input"
+                                value={currentTransaction.transactionValue !== null ? currentTransaction.transactionValue : ''}
+                                onChange={(e) => { setCurrentTransaction({ ...currentTransaction, transactionValue: e.target.value }); validate(); }}
+                                placeholder="Enter value"
+                            />
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -275,6 +345,13 @@ const Transactions = () => {
                                 type="button"
                                 className="btn btn-primary"
                                 data-bs-dismiss={isFormValidState ? "modal" : undefined}
+                                onClick={() => {
+                                    if (isFormValid()) {
+                                        insertRate();
+                                    } else {
+                                        setIsFormValidState(false); // Set form validity state
+                                    }
+                                }}
                             >
                                 Save changes
                             </button>

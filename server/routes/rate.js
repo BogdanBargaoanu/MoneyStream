@@ -89,6 +89,101 @@ router.get('/', function (req, res, next) {
 
 /**
  * @openapi
+ * /rate/{id}:
+ *   get:
+ *     tags:
+ *      - rate
+ *     description: Gets the list of rates for a partner.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Returns the rates.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 idRates:
+ *                   type: integer
+ *                 idLocation:
+ *                   type: integer
+ *                 address:
+ *                   type: string
+ *                 idCurrency:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 value:
+ *                   type: number
+ *                   format: double
+ *                 success:
+ *                   type: boolean
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 success:
+ *                   type: boolean
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+router.get('/:id', function (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.status(401).json({ error: 'No authorization header', success: false });
+        return;
+    }
+
+    const token = authHeader.split(' ')[1]; // get the token from the Authorization header
+    try {
+        jwt.verify(token, 'exchange-secret-key'); // verify the token
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token', success: false });
+        return;
+    }
+
+    const userId = req.params.id; // get the userId from the path parameters
+    if (!userId) {
+        res.status(400).json({ error: 'Missing userId in path parameters', success: false });
+        return;
+    }
+
+    const query = `SELECT rate.idRates, rate.idLocation, location.address, rate.idCurrency, currency.name, rate.date, rate.value FROM rate
+                    INNER JOIN location ON rate.idLocation = location.idLocation
+                    INNER JOIN currency ON rate.idCurrency = currency.idCurrency
+                    WHERE location.idPartner = ${userId}
+                    ORDER BY rate.date ASC`;
+    req.db.query(query, (err, result) => {
+        if (err) {
+            res.status(500).json({ error: err.message, success: false });
+            return;
+        }
+        res.json({ result, success: true });
+    });
+});
+
+/**
+ * @openapi
  * /rate/insert:
  *   post:
  *     tags:
