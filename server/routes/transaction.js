@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const secretKey = process.env.SECRET_KEY;
 
 /**
  * @openapi
@@ -76,7 +78,7 @@ router.get('/', function (req, res, next) {
     const token = authHeader.split(' ')[1];
     let userId;
     try {
-        const decoded = jwt.verify(token, 'exchange-secret-key');
+        const decoded = jwt.verify(token, secretKey);
         userId = decoded.id;
     } catch (err) {
         res.status(401).json({ error: 'Invalid token', success: false });
@@ -201,7 +203,7 @@ router.post('/', function (req, res, next) {
 
     const token = authHeader.split(' ')[1];
     try {
-        jwt.verify(token, 'exchange-secret-key');
+        jwt.verify(token, secretKey);
     } catch (err) {
         return res.status(401).json({ error: 'Invalid token', success: false });
     }
@@ -294,7 +296,7 @@ router.delete('/delete', function (req, res, next) {
 
     const token = authHeader.split(' ')[1];
     try {
-        jwt.verify(token, 'exchange-secret-key');
+        jwt.verify(token, secretKey);
     } catch (err) {
         return res.status(401).json({ error: 'Invalid token', success: false });
     }

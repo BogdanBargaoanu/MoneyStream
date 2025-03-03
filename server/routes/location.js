@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const secretKey = process.env.SECRET_KEY;
 
 /**
  * @openapi
@@ -64,7 +66,7 @@ router.get('/', function (req, res, next) {
   const token = authHeader.split(' ')[1]; // get the token from the Authorization header
   let userId;
   try {
-    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    const decoded = jwt.verify(token, secretKey); // verify the token
     userId = decoded.id; // get the partner ID from the decoded token
   } catch (err) {
     res.status(401).json({ error: 'Invalid token', success: false });
@@ -145,7 +147,7 @@ router.get('/partner', function (req, res, next) {
   const token = authHeader.split(' ')[1]; // get the token from the Authorization header
   let userId;
   try {
-    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    const decoded = jwt.verify(token, secretKey); // verify the token
     userId = decoded.id; // get the partner ID from the decoded token
   } catch (err) {
     res.status(401).json({ error: 'Invalid token', success: false });
@@ -248,7 +250,7 @@ router.post('/insert', function (req, res, next) {
   const token = authHeader.split(' ')[1]; // get the token from the Authorization header
   let userId;
   try {
-    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    const decoded = jwt.verify(token, secretKey); // verify the token
     userId = decoded.id; // get the partner ID from the decoded token
   } catch (err) {
     res.status(401).json({ error: 'Invalid token', success: false });
@@ -385,7 +387,7 @@ router.put('/update', function (req, res, next) {
   const token = authHeader.split(' ')[1]; // get the token from the Authorization header
   let userId;
   try {
-    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    const decoded = jwt.verify(token, secretKey); // verify the token
     userId = decoded.id; // get the partner ID from the decoded token
   } catch (err) {
     res.status(401).json({ error: 'Invalid token', success: false });
@@ -507,7 +509,7 @@ router.delete('/delete', function (req, res, next) {
   const token = authHeader.split(' ')[1]; // get the token from the Authorization header
   let userId;
   try {
-    const decoded = jwt.verify(token, 'exchange-secret-key'); // verify the token
+    const decoded = jwt.verify(token, secretKey); // verify the token
     userId = decoded.id; // get the partner ID from the decoded token
   } catch (err) {
     res.status(401).json({ error: 'Invalid token', success: false });
