@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useTable } from 'react-table'
 import './Currency.css'
 import { useToast } from '../../Context/Toast/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import DataTable from '../DataTable/DataTable';
 
 const Currency = () => {
     const [currencies, setCurrencies] = useState([]);
@@ -195,7 +195,7 @@ const Currency = () => {
         setIsFormValidState(name !== '');
     };
 
-    var data = React.useMemo(() => filteredCurrencies, [filteredCurrencies]);
+    //var data = React.useMemo(() => filteredCurrencies, [filteredCurrencies]);
     const columns = React.useMemo(
         () => [
             {
@@ -228,15 +228,11 @@ const Currency = () => {
         []
     );
 
-
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-        useTable({ columns, data });
-
     return (
         <div>
-            <div class="input-group mb-3 search-box">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">@</span>
+            <div className="input-group mb-3 search-box">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="basic-addon1">@</span>
                 </div>
                 <input
                     className='form-control'
@@ -247,45 +243,18 @@ const Currency = () => {
                     style={{ marginBottom: 20 }}
                 />
             </div>
-            <div id="currency-table" className="table-container">
-                {isLoading ? (<h1>Loading currencies...</h1>) : (<table {...getTableProps()}>
-                    <thead>
-                        {headerGroups.map((headerGroup) => (
-                            <tr {...headerGroup.getHeaderGroupProps()}>
-                                {headerGroup.headers.map((column) => (
-                                    <th {...column.getHeaderProps()}>
-                                        {column.render("Header")}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody {...getTableBodyProps()}>
-                        {rows.map((row) => {
-                            prepareRow(row);
-                            return (
-                                <tr {...row.getRowProps()}>
-                                    {row.cells.map((cell) => (
-                                        <td {...cell.getCellProps()}> {cell.render("Cell")} </td>
-                                    ))}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-                )}
-            </div>
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-currency">
+            <DataTable columns={columns} data={filteredCurrencies} isLoading={isLoading} />
+            <button onClick={() => handleInsertClick()} type="button" className="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-currency">
                 Insert
             </button>
-            <div id="modal-currency" class="modal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Currency</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div id="modal-currency" className="modal" tabindex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Currency</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div className="modal-body">
                             <input
                                 type="text"
                                 className="form-control"
@@ -294,8 +263,8 @@ const Currency = () => {
                                 placeholder="Enter currency name"
                             />
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button
                                 type="button"
                                 className="btn btn-primary"

@@ -15,7 +15,7 @@ const BestRates = () => {
 
     const fetchBestRates = useCallback((page, currencyId) => {
         console.log('fetching best rates');
-        axios.get(`http://localhost:3000/rate/best`, {
+        axios.get(`http://127.0.0.1:3000/rate/best`, {
             params: {
                 page: page,
                 currencyId: currencyId
@@ -35,7 +35,7 @@ const BestRates = () => {
     }, []);
 
     const fetchCurrencies = () => {
-        axios.get('http://localhost:3000/currency/public')
+        axios.get('http://127.0.0.1:3000/currency/public')
             .then(response => {
                 if (response.data.success) {
                     setCurrencies(response.data.result);

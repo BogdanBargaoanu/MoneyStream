@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './Rates.css'
-import { useTable } from 'react-table'
 import { useToast } from '../../Context/Toast/ToastContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import DataTable from '../DataTable/DataTable';
 
 const Rates = () => {
     const [rates, setRates] = useState([]);
@@ -260,7 +260,7 @@ const Rates = () => {
         setIsFormValidState(currentRate.idLocation && currentRate.idCurrency && currentRate.date && currentRate.value !== null);
     };
 
-    var data = React.useMemo(() => rates, [rates]);
+    //var data = React.useMemo(() => rates, [rates]);
     const columns = React.useMemo(
         () => [
             {
@@ -305,13 +305,11 @@ const Rates = () => {
         []
     );
 
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-        useTable({ columns, data });
     return (
         <div>
-            <div class="input-group mb-3 search-box">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">@</span>
+            <div className="input-group mb-3 search-box">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="basic-addon1">@</span>
                 </div>
                 <input
                     className='form-control'
@@ -322,45 +320,18 @@ const Rates = () => {
                     style={{ marginBottom: 20 }}
                 />
             </div>
-            <div id="rate-table" className="table-container">
-                {isLoading ? (<h1>Loading rates...</h1>) : (<table {...getTableProps()}>
-                    <thead>
-                        {headerGroups.map((headerGroup) => (
-                            <tr {...headerGroup.getHeaderGroupProps()}>
-                                {headerGroup.headers.map((column) => (
-                                    <th {...column.getHeaderProps()}>
-                                        {column.render("Header")}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody {...getTableBodyProps()}>
-                        {rows.map((row) => {
-                            prepareRow(row);
-                            return (
-                                <tr {...row.getRowProps()}>
-                                    {row.cells.map((cell) => (
-                                        <td {...cell.getCellProps()}> {cell.render("Cell")} </td>
-                                    ))}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-                )}
-            </div>
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-rate">
+            <DataTable columns={columns} data={rates} isLoading={isLoading} />
+            <button onClick={() => handleInsertClick()} type="button" className="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-rate">
                 Insert
             </button>
-            <div id="modal-rate" class="modal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Rate</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div id="modal-rate" className="modal" tabindex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Rate</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div className="modal-body">
                             <select
                                 className="form-control rate-input"
                                 value={currentRate.idLocation || ''}
@@ -400,8 +371,8 @@ const Rates = () => {
                                 placeholder="Enter value"
                             />
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button
                                 type="button"
                                 className="btn btn-primary"
