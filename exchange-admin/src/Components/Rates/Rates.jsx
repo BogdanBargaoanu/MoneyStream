@@ -324,7 +324,7 @@ const Rates = () => {
             <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-rate">
                 Insert
             </button>
-            <div id="modal-rate" class="modal" tabindex="-1">
+            <div id="modal-rate" className="modal" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">

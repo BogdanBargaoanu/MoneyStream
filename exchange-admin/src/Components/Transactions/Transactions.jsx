@@ -8,11 +8,16 @@ import DataTable from '../DataTable/DataTable';
 const Transactions = () => {
     const [transactions, setTransactions] = useState([]);
     const [rates, setRates] = useState([]);
-    const [currencies, setCurrencies] = useState([]);
-    const [locations, setLocations] = useState([]);
+    const [partners, setPartners] = useState([]);
     const [searchValue, setSearchValue] = useState(null);
     const [isFormValidState, setIsFormValidState] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [currentTransaction, setCurrentTransaction] = useState({
+        idRate: null,
+        idPartnerRate: null,
+        idPartner: null,
+        transactionValue: null,
+    });
     const { showToastMessage } = useToast();
     const navigate = useNavigate();
 
@@ -73,63 +78,29 @@ const Transactions = () => {
             });
     };
 
-    const fetchCurrencies = () => {
-        const token = localStorage.getItem('user-token');
-        axios.get('http://localhost:3000/currency',
-            {
-                headers: {
-                    Authorization: `Bearer ${token}` // send the token in the Authorization header
-                }
-            })
-            .then(response => {
-                if (response.data.success) {
-                    setCurrencies(response.data.result);
-                }
-                else {
-                    console.error('Failed to fetch currencies');
-                    showToastMessage('Failed to fetch currencies' + (response?.data?.error || ''));
-                }
-
-            })
-            .catch(error => {
-                console.error(error);
-                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
-                }
-            });
-    };
-
-    const fetchLocations = () => {
-        const token = localStorage.getItem('user-token');
-        axios.get(`http://localhost:3000/location/partner`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}` // send the token in the Authorization header
-                }
-            })
-            .then(response => {
-                if (response.data.success) {
-                    setLocations(response.data.result);
-                }
-                else {
-                    console.error('Failed to fetch locations' + (response?.data?.error || ''));
-                }
-
-            })
-            .catch(error => {
-                console.error(error);
-                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
-                    localStorage.removeItem('user-token');
-                    navigate('/login');
-                }
-            });
-    };
-
     useEffect(() => {
         fetchTransactions();
         setIsLoading(false);
     }, []);
+
+    const fetchPartnerRates = (idPartner) => {
+    };
+
+    const fetchPartners = () => {
+        axios.get('http://localhost:3000/partner')
+            .then(response => {
+                if (response.data.success) {
+                    setPartners(response.data.result);
+                }
+                else {
+                    console.error('Failed to fetch partners');
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    };
 
     const handleSearch = (event) => {
         const value = event.target.value;
@@ -139,7 +110,52 @@ const Transactions = () => {
 
     const filter = (value) => { };
 
+    const resetTransaction = () => {
+        setCurrentTransaction({
+            idRate: null,
+            idPartnerRate: null,
+            idPartner: null,
+            transactionValue: null,
+        });
+    };
+
+    const handleInsertClick = async () => {
+        setIsFormValidState(false);
+        fetchRates();
+        fetchPartners();
+        resetTransaction();
+    };
+
     const deleteTransaction = (transaction) => {
+        const token = localStorage.getItem('user-token');
+        axios.delete(`http://localhost:3000/transaction/delete`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}` // send the token in the Authorization header
+                },
+                data: {
+                    idTransaction: transaction.idTransaction
+                }
+            })
+            .then(response => {
+                if (response.data.success) {
+                    showToastMessage('Transaction deleted successfully');
+                    fetchTransactions();
+                }
+                else {
+                    console.error('Failed to delete transaction');
+                    showToastMessage('Failed to delete transaction' + (response?.data?.error || ''));
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+                showToastMessage('Failed to delete transaction: ' + (error.response?.data?.error || 'Unknown error'));
+                if (error.response?.data?.error === 'No authorization header' || error.response?.data?.error === 'Invalid token') {
+                    localStorage.removeItem('user-token');
+                    navigate('/login');
+                }
+            });
     };
 
     const columns = React.useMemo(
@@ -215,6 +231,57 @@ const Transactions = () => {
                 />
             </div>
             <DataTable columns={columns} data={transactions} isLoading={isLoading} />
+            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-transaction">
+                Insert
+            </button>
+            <div id="modal-transaction" className='modal' tabIndex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Transaction</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <select
+                                className="form-control transaction-input"
+                                value={currentTransaction.idRate || ''}
+                                onChange={(e) => setCurrentTransaction({ ...currentTransaction, idRate: e.target.value })}
+                            >
+                                <option value="" disabled>Select Rate</option>
+                                {rates.map(rate => (
+                                    <option key={rate.idRate} value={rate.idRate}>{rate.name}, {rate.value}, {rate.address}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="form-control transaction-input"
+                                value={currentTransaction.idPartner || ''}
+                                onChange={(e) => {setCurrentTransaction({ ...currentTransaction, idPartner: e.target.value }); fetchPartnerRates(e.target.value)}}
+                            >
+                                <option value="" disabled>Select Partner</option>
+                                {partners.map(partner => (
+                                    <option key={partner.idPartner} value={partner.idPartner}>{partner.username}, {partner.email}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="form-control transaction-input"
+                                value={currentTransaction.idPartnerRate || ''}
+                            >
+                                <option value="" disabled>Select Partner Rate</option>
+                            </select>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                data-bs-dismiss={isFormValidState ? "modal" : undefined}
+                            >
+                                Save changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
