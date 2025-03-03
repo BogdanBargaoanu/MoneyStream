@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './Locations.css'
-import { useTable } from 'react-table'
 import { useToast } from '../../Context/Toast/ToastContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import DataTable from '../DataTable/DataTable';
 
 
 const Locations = () => {
@@ -268,7 +268,7 @@ const Locations = () => {
         setIsFormValidState(currentLocation.address !== '' && currentLocation.latitude !== null && currentLocation.longitude !== null && currentLocation.information !== '');
     };
 
-    var data = React.useMemo(() => filteredLocations, [filteredLocations]);
+    //var data = React.useMemo(() => filteredLocations, [filteredLocations]);
     const columns = React.useMemo(
         () => [
             {
@@ -313,8 +313,6 @@ const Locations = () => {
         []
     );
 
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-        useTable({ columns, data });
     return (
         <div>
             <div class="input-group mb-3 search-box">
@@ -330,34 +328,7 @@ const Locations = () => {
                     style={{ marginBottom: 20 }}
                 />
             </div>
-            <div id="location-table" className="table-container">
-                {isLoading ? (<h1>Loading locations...</h1>) : (<table {...getTableProps()}>
-                    <thead>
-                        {headerGroups.map((headerGroup) => (
-                            <tr {...headerGroup.getHeaderGroupProps()}>
-                                {headerGroup.headers.map((column) => (
-                                    <th {...column.getHeaderProps()}>
-                                        {column.render("Header")}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody {...getTableBodyProps()}>
-                        {rows.map((row) => {
-                            prepareRow(row);
-                            return (
-                                <tr {...row.getRowProps()}>
-                                    {row.cells.map((cell) => (
-                                        <td {...cell.getCellProps()}> {cell.render("Cell")} </td>
-                                    ))}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-                )}
-            </div>
+            <DataTable columns={columns} data={filteredLocations} isLoading={isLoading} />
             <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-location">
                 Insert
             </button>

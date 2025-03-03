@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
 import axios from 'axios';
 //import fakeData from "./MOCK_DATA.json";
-import { useTable } from 'react-table'
 import './Partners.css'
+import DataTable from '../DataTable/DataTable';
 
 const Partners = () => {
     const [partners, setPartners] = React.useState([]);
@@ -48,7 +48,7 @@ const Partners = () => {
         }
     };
 
-    var data = useMemo(() => filteredPartners, [filteredPartners]);
+    //var data = useMemo(() => filteredPartners, [filteredPartners]);
     const columns = useMemo(
         () => [
             {
@@ -71,9 +71,6 @@ const Partners = () => {
         []
     );
 
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-        useTable({ columns, data });
-
     return (
         <div>
             <div className="input-group mb-3 search-box">
@@ -89,33 +86,7 @@ const Partners = () => {
                     style={{ marginBottom: 20 }}
                 />
             </div>
-            <div id="partners-table" className="table-container">
-                {isLoading ? (<h1>Loading partners...</h1>) : (<table {...getTableProps()}>
-                    <thead>
-                        {headerGroups.map((headerGroup) => (
-                            <tr {...headerGroup.getHeaderGroupProps()}>
-                                {headerGroup.headers.map((column) => (
-                                    <th {...column.getHeaderProps()}>
-                                        {column.render("Header")}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody {...getTableBodyProps()}>
-                        {rows.map((row) => {
-                            prepareRow(row);
-                            return (
-                                <tr {...row.getRowProps()}>
-                                    {row.cells.map((cell) => (
-                                        <td {...cell.getCellProps()}> {cell.render("Cell")} </td>
-                                    ))}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>)}
-            </div>
+            <DataTable columns={columns} data={filteredPartners} isLoading={isLoading} />
         </div>
     );
 }
