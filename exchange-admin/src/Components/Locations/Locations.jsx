@@ -315,9 +315,9 @@ const Locations = () => {
 
     return (
         <div>
-            <div class="input-group mb-3 search-box">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">@</span>
+            <div className="input-group mb-3 search-box">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="basic-addon1">@</span>
                 </div>
                 <input
                     className='form-control'
@@ -329,17 +329,17 @@ const Locations = () => {
                 />
             </div>
             <DataTable columns={columns} data={filteredLocations} isLoading={isLoading} />
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-location">
+            <button onClick={() => handleInsertClick()} type="button" className="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-location">
                 Insert
             </button>
-            <div id="modal-location" class="modal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Location</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div id="modal-location" className="modal" tabindex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Location</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div className="modal-body">
                             <input
                                 type="text"
                                 className="form-control location-input"
@@ -381,7 +381,7 @@ const Locations = () => {
                                 ></iframe>
                             </div>
                         </div>
-                        <div class="modal-footer">
+                        <div className="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button
                                 type="button"

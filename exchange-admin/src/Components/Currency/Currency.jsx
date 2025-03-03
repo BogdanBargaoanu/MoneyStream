@@ -230,9 +230,9 @@ const Currency = () => {
 
     return (
         <div>
-            <div class="input-group mb-3 search-box">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">@</span>
+            <div className="input-group mb-3 search-box">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="basic-addon1">@</span>
                 </div>
                 <input
                     className='form-control'
@@ -244,17 +244,17 @@ const Currency = () => {
                 />
             </div>
             <DataTable columns={columns} data={filteredCurrencies} isLoading={isLoading} />
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-currency">
+            <button onClick={() => handleInsertClick()} type="button" className="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-currency">
                 Insert
             </button>
-            <div id="modal-currency" class="modal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Currency</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div id="modal-currency" className="modal" tabindex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Currency</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div className="modal-body">
                             <input
                                 type="text"
                                 className="form-control"
@@ -263,8 +263,8 @@ const Currency = () => {
                                 placeholder="Enter currency name"
                             />
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button
                                 type="button"
                                 className="btn btn-primary"

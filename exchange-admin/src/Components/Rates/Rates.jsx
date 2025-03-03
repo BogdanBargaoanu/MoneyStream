@@ -307,9 +307,9 @@ const Rates = () => {
 
     return (
         <div>
-            <div class="input-group mb-3 search-box">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">@</span>
+            <div className="input-group mb-3 search-box">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="basic-addon1">@</span>
                 </div>
                 <input
                     className='form-control'
@@ -321,17 +321,17 @@ const Rates = () => {
                 />
             </div>
             <DataTable columns={columns} data={rates} isLoading={isLoading} />
-            <button onClick={() => handleInsertClick()} type="button" class="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-rate">
+            <button onClick={() => handleInsertClick()} type="button" className="btn btn-primary btn-insert" data-bs-toggle="modal" data-bs-target="#modal-rate">
                 Insert
             </button>
             <div id="modal-rate" className="modal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Rate</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Rate</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div className="modal-body">
                             <select
                                 className="form-control rate-input"
                                 value={currentRate.idLocation || ''}
@@ -371,8 +371,8 @@ const Rates = () => {
                                 placeholder="Enter value"
                             />
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button
                                 type="button"
                                 className="btn btn-primary"
