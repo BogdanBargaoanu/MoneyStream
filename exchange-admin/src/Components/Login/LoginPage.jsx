@@ -14,9 +14,10 @@ const LoginPage = () => {
     const [email, setEmail] = useState("");
     const { showToastMessage } = useToast();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const handleLogin = () => {
-        axios.post('http://localhost:3000/partner/login', {
+        axios.post(`${apiUrl}/partner/login`, {
             username: username,
             password: password
         })
@@ -33,7 +34,7 @@ const LoginPage = () => {
     };
 
     const handleSignUp = () => {
-        axios.post('http://localhost:3000/partner/addPartner', {
+        axios.post(`${apiUrl}/partner/addPartner`, {
             username: username,
             email: email,
             password: password,

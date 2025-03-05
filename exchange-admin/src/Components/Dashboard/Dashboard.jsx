@@ -12,6 +12,7 @@ const Dashboard = () => {
     const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         fetchCurrencies();
@@ -33,7 +34,7 @@ const Dashboard = () => {
 
     const fetchRates = () => {
         const token = localStorage.getItem('user-token');
-        axios.get(`http://localhost:3000/rate`, {
+        axios.get(`${apiUrl}/rate`, {
             headers: {
                 Authorization: `Bearer ${token}` // send the token in the Authorization header
             }
@@ -58,7 +59,7 @@ const Dashboard = () => {
 
     const fetchCurrencies = () => {
         const token = localStorage.getItem('user-token');
-        axios.get('http://localhost:3000/currency',
+        axios.get(`${apiUrl}/currency`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header

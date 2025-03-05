@@ -21,10 +21,11 @@ const Rates = () => {
     });
     const { showToastMessage } = useToast();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchRates = () => {
         const token = localStorage.getItem('user-token');
-        axios.get(`http://localhost:3000/rate`,
+        axios.get(`${apiUrl}/rate`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
@@ -52,7 +53,7 @@ const Rates = () => {
 
     const fetchCurrencies = () => {
         const token = localStorage.getItem('user-token');
-        axios.get('http://localhost:3000/currency',
+        axios.get(`${apiUrl}/currency`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
@@ -79,7 +80,7 @@ const Rates = () => {
 
     const fetchLocations = () => {
         const token = localStorage.getItem('user-token');
-        axios.get(`http://localhost:3000/location/partner`,
+        axios.get(`${apiUrl}/location/partner`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
@@ -135,7 +136,7 @@ const Rates = () => {
 
     const insertRate = () => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.post(`http://localhost:3000/rate/insert`, {
+        axios.post(`${apiUrl}/rate/insert`, {
             idLocation: currentRate.idLocation,
             idCurrency: currentRate.idCurrency,
             date: currentRate.date,
@@ -179,7 +180,7 @@ const Rates = () => {
     const updateRate = () => {
         console.log("Updating rate with id: ", currentRate.idrate);
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.put(`http://localhost:3000/rate/update`, {
+        axios.put(`${apiUrl}/rate/update`, {
             idRates: currentRate.idRates,
             idLocation: currentRate.idLocation,
             idCurrency: currentRate.idCurrency,
@@ -210,7 +211,7 @@ const Rates = () => {
 
     const deleteRate = (rate) => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.delete(`http://localhost:3000/rate/delete`, {
+        axios.delete(`${apiUrl}/rate/delete`, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
             },

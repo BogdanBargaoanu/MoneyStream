@@ -15,10 +15,11 @@ const Currency = () => {
     const [isFormValidState, setIsFormValidState] = useState(false); // State to track form validity
     const { showToastMessage } = useToast();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchCurrencies = () => {
         const token = localStorage.getItem('user-token');
-        axios.get('http://localhost:3000/currency',
+        axios.get(`${apiUrl}/currency`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
@@ -74,7 +75,7 @@ const Currency = () => {
 
     const insertCurrency = () => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.post(`http://localhost:3000/currency/insert`, {
+        axios.post(`${apiUrl}/currency/insert`, {
             name: name
         }, {
             headers: {
@@ -119,7 +120,7 @@ const Currency = () => {
     const updateCurrency = () => {
         console.log("Updating currency with id: ", id);
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.put(`http://localhost:3000/currency/update`, {
+        axios.put(`${apiUrl}/currency/update`, {
             idCurrency: id,
             name: name
         }, {
@@ -154,7 +155,7 @@ const Currency = () => {
 
     const deleteCurrency = (currency) => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.delete(`http://localhost:3000/currency/delete`, {
+        axios.delete(`${apiUrl}/currency/delete`, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
             },

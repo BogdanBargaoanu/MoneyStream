@@ -9,9 +9,10 @@ const Partners = () => {
     const [filteredPartners, setFilteredPartners] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [searchValue, setSearchValue] = React.useState(null);
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchPartners = () => {
-        axios.get('http://localhost:3000/partner')
+        axios.get(`${apiUrl}/partner`)
             .then(response => {
                 if (response.data.success) {
                     setPartners(response.data.result);
