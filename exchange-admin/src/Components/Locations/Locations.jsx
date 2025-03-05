@@ -21,10 +21,11 @@ const Locations = () => {
     });
     const { showToastMessage } = useToast();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchLocations = () => {
         const token = localStorage.getItem('user-token');
-        axios.get(`http://localhost:3000/location/partner`,
+        axios.get(`${apiUrl}/location/partner`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
@@ -89,7 +90,7 @@ const Locations = () => {
 
     const insertLocation = () => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.post(`http://localhost:3000/location/insert`, {
+        axios.post(`${apiUrl}/location/insert`, {
             address: currentLocation.address,
             latitude: currentLocation.latitude,
             longitude: currentLocation.longitude,
@@ -139,7 +140,7 @@ const Locations = () => {
     const updateLocation = () => {
         console.log("Updating location with id: ", currentLocation.idLocation);
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.put(`http://localhost:3000/location/update`, {
+        axios.put(`${apiUrl}/location/update`, {
             idLocation: currentLocation.idLocation,
             address: currentLocation.address,
             latitude: currentLocation.latitude,
@@ -181,7 +182,7 @@ const Locations = () => {
 
     const deleteLocation = (location) => {
         const token = localStorage.getItem('user-token'); // Retrieve the token from local storage
-        axios.delete(`http://localhost:3000/location/delete`, {
+        axios.delete(`${apiUrl}/location/delete`, {
             headers: {
                 Authorization: `Bearer ${token}` // Send the token in the Authorization header
             },

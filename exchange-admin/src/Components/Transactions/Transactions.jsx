@@ -21,10 +21,11 @@ const Transactions = () => {
     });
     const { showToastMessage } = useToast();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchTransactions = () => {
         const token = localStorage.getItem('user-token');
-        axios.get('http://localhost:3000/transaction',
+        axios.get(`${apiUrl}/transaction`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
@@ -52,7 +53,7 @@ const Transactions = () => {
     }
 
     const fetchRates = useCallback((idPartner) => {
-        const url = idPartner ? `http://localhost:3000/rate/${idPartner}` : `http://localhost:3000/rate`;
+        const url = idPartner ? `${apiUrl}/rate/${idPartner}` : `${apiUrl}/rate`;
         const token = localStorage.getItem('user-token');
         axios.get(url,
             {
@@ -91,7 +92,7 @@ const Transactions = () => {
     }, []);
 
     const fetchPartners = () => {
-        axios.get('http://localhost:3000/partner')
+        axios.get(`${apiUrl}/partner`)
             .then(response => {
                 if (response.data.success) {
                     setPartners(response.data.result);
@@ -134,7 +135,7 @@ const Transactions = () => {
     const insertRate = () => {
         const token = localStorage.getItem('user-token');
         console.log(currentTransaction);
-        axios.post('http://localhost:3000/transaction', {
+        axios.post(`${apiUrl}/transaction`, {
             idRate: currentTransaction.idRate,
             idPartnerRate: currentTransaction.idPartnerRate,
             value: currentTransaction.transactionValue
@@ -167,7 +168,7 @@ const Transactions = () => {
 
     const deleteTransaction = (transaction) => {
         const token = localStorage.getItem('user-token');
-        axios.delete(`http://localhost:3000/transaction/delete`,
+        axios.delete(`${apiUrl}/transaction/delete`,
             {
                 headers: {
                     Authorization: `Bearer ${token}` // send the token in the Authorization header
