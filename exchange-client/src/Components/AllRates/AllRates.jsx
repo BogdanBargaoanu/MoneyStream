@@ -9,10 +9,11 @@ const AllRates = () => {
     const [allRates, setAllRates] = useState([]);
     const [groupedRates, setGroupedRates] = useState([]);
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchAllRates = () => {
         console.log('fetching nearest rates');
-        axios.get(`http://127.0.0.1:3000/rate/allRates`)
+        axios.get(`${apiUrl}/rate/allRates`)
             .then(response => {
                 if (response.data.success) {
                     setAllRates(response.data.result);

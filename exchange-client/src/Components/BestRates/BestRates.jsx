@@ -12,10 +12,11 @@ const BestRates = () => {
     const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchBestRates = useCallback((page, currencyId) => {
         console.log('fetching best rates');
-        axios.get(`http://127.0.0.1:3000/rate/best`, {
+        axios.get(`${apiUrl}/rate/best`, {
             params: {
                 page: page,
                 currencyId: currencyId
@@ -35,7 +36,7 @@ const BestRates = () => {
     }, []);
 
     const fetchCurrencies = () => {
-        axios.get('http://127.0.0.1:3000/currency/public')
+        axios.get(`${apiUrl}/currency/public`)
             .then(response => {
                 if (response.data.success) {
                     setCurrencies(response.data.result);

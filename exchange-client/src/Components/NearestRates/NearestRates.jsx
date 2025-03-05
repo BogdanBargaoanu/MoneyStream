@@ -11,16 +11,16 @@ const NearestRates = () => {
     const queryParams = new URLSearchParams(location.search);
     const latitude = queryParams.get('lat');
     const longitude = queryParams.get('lng');
-
     const [nearestRates, setNearestRates] = useState([]);
     const [currencies, setCurrencies] = useState([]);
     const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchNearestRates = useCallback((latitude, longitude, page, currencyId) => {
         console.log('fetching nearest rates');
-        axios.get(`http://127.0.0.1:3000/rate/nearest`, {
+        axios.get(`${apiUrl}/rate/nearest`, {
             params: {
                 latitude: latitude,
                 longitude: longitude,
@@ -43,7 +43,7 @@ const NearestRates = () => {
     }, []);
 
     const fetchCurrencies = () => {
-        axios.get('http://127.0.0.1:3000/currency/public')
+        axios.get(`${apiUrl}/currency/public`)
             .then(response => {
                 if (response.data.success) {
                     setCurrencies(response.data.result);
