@@ -18,6 +18,8 @@ const Transactions = () => {
         idPartnerRate: null,
         idPartner: null,
         transactionValue: null,
+        start: '',
+        finish: ''
     });
     const { showToastMessage } = useToast();
     const navigate = useNavigate();
@@ -218,6 +220,14 @@ const Transactions = () => {
         setIsFormValidState(currentTransaction.idRate && currentTransaction.idPartnerRate && currentTransaction.transactionValue !== null);
     };
 
+    const generateMapUrl = (start, finish) => {
+        if (!start || !finish) return '';
+        const baseUrl = 'https://www.google.com/maps/embed/v1/directions';
+        const apiKey = process.env.REACT_APP_MAPS_API_KEY; // Replace with your Google Maps API key
+        const url = `${baseUrl}?key=${apiKey}&origin=${encodeURIComponent(start)}&destination=${encodeURIComponent(finish)}&mode=driving`;
+        return url;
+    };
+
     const columns = React.useMemo(
         () => [
             {
@@ -339,6 +349,16 @@ const Transactions = () => {
                                 onChange={(e) => { setCurrentTransaction({ ...currentTransaction, transactionValue: e.target.value }); validate(); }}
                                 placeholder="Enter value"
                             />
+                            <div className="maps-wrapper">
+                                <iframe
+                                    width="100%"
+                                    height="300px"
+                                    loading="lazy"
+                                    allowFullScreen
+                                    src={generateMapUrl(rates.find(rate => rate.idRates === currentTransaction.idRate)?.address,
+                                        partnerRates.find(rate => rate.idRates === currentTransaction.idPartnerRate)?.address)}
+                                ></iframe>
+                            </div>
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
