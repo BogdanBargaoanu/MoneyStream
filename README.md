@@ -67,10 +67,23 @@ This repository contains three main components of the Exchange Rate Application:
 4. **Environmental variables**:
    - Create a `.env` file in the `server` directory.
    - Enter your SMTP credentials.
-   
+   <br></br>
+     
+   > MySql
    ```ini
     SMTP_USER=your_email
     SMTP_PASS=your_password
+    SECRET_KEY=your_secret_key
+    MYSQL_HOST=your_host(localhost if locally)
+    MYSQL_USER=your_user(root if default)
+    MYSQL_PASS=your_mysql_pass
+   ```   
+   - Create a `.env` file in the `exchange-admin` and `exchange-admin` directory.
+   <br></br>
+   
+   > Admin App & Client App
+   ```ini
+   REACT_APP_API_URL=your_ivp4_url
    ```
 
 5. **Run the server**:
