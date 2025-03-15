@@ -84,7 +84,7 @@ This repository contains three main components of the Exchange Rate Application:
    <br></br>
    > Admin App & Client App
    ```ini
-   REACT_APP_API_URL=your_ivp4_url
+   REACT_APP_API_URL=your_IPV4_url
    ```
 
 5. **Run the server**:
