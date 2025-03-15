@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/BogdanBargaoanu/ExchangeMonitor/refs/heads/main/exchange-client/src/Components/Assets/logo.png" style="width: 100px;">MoneyStream
+ # <img src="https://raw.githubusercontent.com/BogdanBargaoanu/ExchangeMonitor/refs/heads/main/exchange-client/src/Components/Assets/logo.png" style="width: 100px;">MoneyStream
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
@@ -70,7 +70,7 @@ This repository contains three main components of the Exchange Rate Application:
    - Enter the MySQL credentials.
    <br></br>
      
-   > MySQL
+   > SMTP & MySQL
    ```ini
     SMTP_USER=your_email
     SMTP_PASS=your_password
