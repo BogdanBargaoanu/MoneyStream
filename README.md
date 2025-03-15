@@ -70,7 +70,7 @@ This repository contains three main components of the Exchange Rate Application:
    - Enter the MySQL credentials.
    <br></br>
      
-   > MySql
+   > MySQL
    ```ini
     SMTP_USER=your_email
     SMTP_PASS=your_password
