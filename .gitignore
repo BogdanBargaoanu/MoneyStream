@@ -129,3 +129,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 exchange-admin/src/Components/Partners/MOCK_DATA.json
+documentation/~$minute_pitch.docx
