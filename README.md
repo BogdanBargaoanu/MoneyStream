@@ -1,8 +1,50 @@
- # <img src="https://raw.githubusercontent.com/BogdanBargaoanu/ExchangeMonitor/refs/heads/main/exchange-client/src/Components/Assets/logo.png" style="width: 100px;">MoneyStream
+<div align="center" class="text-center">
+<img src="https://raw.githubusercontent.com/BogdanBargaoanu/ExchangeMonitor/refs/heads/main/exchange-client/src/Components/Assets/logo.png" style="width: 100px;">
+<h1>MoneyStream</h1>
+<p><em>Streamlining your finances, empowering your future.</em></p>
+
+<img alt="last-commit" src="https://img.shields.io/github/last-commit/BogdanBargaoanu/MoneyStream?style=flat&logo=git&logoColor=white&color=0080ff">
+<img alt="repo-top-language" src="https://img.shields.io/github/languages/top/BogdanBargaoanu/MoneyStream?style=flat&color=0080ff">
+<img alt="repo-language-count" src="https://img.shields.io/github/languages/count/BogdanBargaoanu/MoneyStream?style=flat&color=0080ff">
+
+<p><em>Built with the tools and technologies:</em></p>
+
+<h3>Frontend</h3>
+<img alt="React" src="https://img.shields.io/badge/React-61DAFB.svg?style=flat&logo=React&logoColor=black">
+<img alt="Bootstrap" src="https://img.shields.io/badge/Bootstrap-7952B3.svg?style=flat&logo=Bootstrap&logoColor=white">
+<img alt="React Bootstrap" src="https://img.shields.io/badge/React%20Bootstrap-41E0FD.svg?style=flat&logo=React-Bootstrap&logoColor=black">
+<img alt="React Router" src="https://img.shields.io/badge/React%20Router-CA4245.svg?style=flat&logo=React-Router&logoColor=white">
+<img alt="Axios" src="https://img.shields.io/badge/Axios-5A29E4.svg?style=flat&logo=Axios&logoColor=white">
+<img alt="React Table" src="https://img.shields.io/badge/React%20Table-FF4154.svg?style=flat&logo=React-Table&logoColor=white">
+<img alt="Google Charts" src="https://img.shields.io/badge/Google%20Charts-4285F4.svg?style=flat&logo=Google-Chrome&logoColor=white">
+
+<h3>Backend</h3>
+<img alt="Express" src="https://img.shields.io/badge/Express-000000.svg?style=flat&logo=Express&logoColor=white">
+<img alt="Node.js" src="https://img.shields.io/badge/Node.js-339933.svg?style=flat&logo=Node.js&logoColor=white">
+<img alt="MySQL" src="https://img.shields.io/badge/MySQL-4479A1.svg?style=flat&logo=MySQL&logoColor=white">
+<img alt="JWT" src="https://img.shields.io/badge/JWT-000000.svg?style=flat&logo=JSON-Web-Tokens&logoColor=white">
+<img alt="Swagger" src="https://img.shields.io/badge/Swagger-85EA2D.svg?style=flat&logo=Swagger&logoColor=black">
+<img alt="Nodemailer" src="https://img.shields.io/badge/Nodemailer-00F88E.svg?style=flat&logo=Mail.Ru&logoColor=white">
+
+<h3>Additional Tools</h3>
+<img alt="CORS" src="https://img.shields.io/badge/CORS-6478FF.svg?style=flat&logo=Cross-Origin-Resource-Sharing&logoColor=white">
+<img alt="dotenv" src="https://img.shields.io/badge/dotenv-ECD53F.svg?style=flat&logo=dotenv&logoColor=black">
+<br>
+<br>
+<br>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+<br>
+<br>
 
 **MoneyStream** is a comprehensive platform designed to provide users with real-time exchange rates, manage exchange rate data, and visualize currency trends. It includes a robust backend server, an admin interface for managing data, and a client interface for end-users to view the best or nearest exchange rates.
+
+</div>
+<br>
+<br>
+
+
+
 
 ## Highlights
  - Featured in **Internet of Things Student Challange 2025**
@@ -21,29 +63,6 @@ This repository contains three main components of the Exchange Rate Application:
 1. **Server App**: Backend server that handles API requests and database interactions.
 2. **Exchange Admin App**: Admin interface for managing exchange rates, locations, and currencies.
 3. **Exchange Client App**: Client interface for viewing the nearest and best exchange rates.
-
-## Technologies Used
-
-- **Server App**:
-  - Node.js
-  - Express.js
-  - MySQL
-  - SMTP
-  - Swagger (OpenAPI) for API documentation
-
-- **Exchange Admin App**:
-  - React.js
-  - Axios for API requests
-  - React Table for data tables
-  - Bootstrap for styling
-  - React Google Charts for data visualization
-
-- **Exchange Client App**:
-  - React.js
-  - Axios for API requests
-  - React Router for navigation
-  - React Icons for icons
-  - React Google Charts for data visualization
 
 ## Setup Instructions
 
