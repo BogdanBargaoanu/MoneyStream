@@ -8,8 +8,6 @@
 <img alt="repo-language-count" src="https://img.shields.io/github/languages/count/BogdanBargaoanu/MoneyStream?style=flat&color=0080ff">
 
 <p><em>Built with the tools and technologies:</em></p>
-
-<h3>Frontend</h3>
 <img alt="React" src="https://img.shields.io/badge/React-61DAFB.svg?style=flat&logo=React&logoColor=black">
 <img alt="Bootstrap" src="https://img.shields.io/badge/Bootstrap-7952B3.svg?style=flat&logo=Bootstrap&logoColor=white">
 <img alt="React Bootstrap" src="https://img.shields.io/badge/React%20Bootstrap-41E0FD.svg?style=flat&logo=React-Bootstrap&logoColor=black">
@@ -17,16 +15,12 @@
 <img alt="Axios" src="https://img.shields.io/badge/Axios-5A29E4.svg?style=flat&logo=Axios&logoColor=white">
 <img alt="React Table" src="https://img.shields.io/badge/React%20Table-FF4154.svg?style=flat&logo=React-Table&logoColor=white">
 <img alt="Google Charts" src="https://img.shields.io/badge/Google%20Charts-4285F4.svg?style=flat&logo=Google-Chrome&logoColor=white">
-
-<h3>Backend</h3>
 <img alt="Express" src="https://img.shields.io/badge/Express-000000.svg?style=flat&logo=Express&logoColor=white">
 <img alt="Node.js" src="https://img.shields.io/badge/Node.js-339933.svg?style=flat&logo=Node.js&logoColor=white">
 <img alt="MySQL" src="https://img.shields.io/badge/MySQL-4479A1.svg?style=flat&logo=MySQL&logoColor=white">
 <img alt="JWT" src="https://img.shields.io/badge/JWT-000000.svg?style=flat&logo=JSON-Web-Tokens&logoColor=white">
 <img alt="Swagger" src="https://img.shields.io/badge/Swagger-85EA2D.svg?style=flat&logo=Swagger&logoColor=black">
 <img alt="Nodemailer" src="https://img.shields.io/badge/Nodemailer-00F88E.svg?style=flat&logo=Mail.Ru&logoColor=white">
-
-<h3>Additional Tools</h3>
 <img alt="CORS" src="https://img.shields.io/badge/CORS-6478FF.svg?style=flat&logo=Cross-Origin-Resource-Sharing&logoColor=white">
 <img alt="dotenv" src="https://img.shields.io/badge/dotenv-ECD53F.svg?style=flat&logo=dotenv&logoColor=black">
 <br>
