@@ -78,7 +78,6 @@ This repository contains three main components of the Exchange Rate Application:
    ```
 
 3. **Set up the database**:
-   - Create a MySQL database and import the provided schema.
    - Update the database configuration in `server/app.js`.
 
 4. **Environmental variables**:
