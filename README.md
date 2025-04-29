@@ -158,7 +158,7 @@ This repository contains three main components of the Exchange Rate Application:
 
 ### Exchange Admin App
 
-- Login Functionality.
+- Login Functionality with 2FA via email confirmation code.
 > The admin app includes a login page where administrators must authenticate using their credentials.
 >
 > JWT tokens are used to manage sessions securely.
