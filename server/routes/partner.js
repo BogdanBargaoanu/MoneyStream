@@ -358,7 +358,25 @@ router.post('/login', function (req, res, next) {
             const partner = results[0];
             if (partner.password == hashedPassword) {
                 const token = jwt.sign({ id: partner.idPartner, username: partner.username }, 'exchange-secret-key', { expiresIn: '24h' });
-                res.json({ success: true, token: token });
+                const userVerificationCode = crypto.randomBytes(3).toString('hex'); // Generate a random 6-digit verification code
+                res.json({ success: true, token: token, userVerificationCode: userVerificationCode });
+
+                // HTML content for the email
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                        <h2 style="color: #4CAF50;">Welcome back to MoneyStream!</h2>
+                        <p>Your verification code is: <strong>${userVerificationCode}</strong></p>
+                        <p>Best regards,</p>
+                        <p>The MoneyStream Team</p>
+                    </div>
+                `;
+                // Send a verification code email
+                sendEmail(
+                    partner.email,
+                    'MoneyStream Verification Code',
+                    `Hello ${partner.username}, your verification code is: ${userVerificationCode}`,
+                    htmlContent
+                );
             } else {
                 res.status(401).json({ success: false, error: 'Incorrect login details!' });
             }

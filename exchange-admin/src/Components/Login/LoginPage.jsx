@@ -66,7 +66,7 @@ const LoginPage = () => {
             showToastMessage('Invalid verification code. Please try again.');
             return;
         }
-        localStorage.setItem('user-token', response.data.token);
+        localStorage.setItem('user-token', authToken);
         navigate('/dashboard');
     };
 
