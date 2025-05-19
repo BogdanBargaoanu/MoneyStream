@@ -3,6 +3,8 @@ var router = express.Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../emailService');
+require('dotenv').config();
+const secretKey = process.env.SECRET_KEY;
 
 /**
  * @openapi
@@ -357,7 +359,7 @@ router.post('/login', function (req, res, next) {
         if (results.length > 0) {
             const partner = results[0];
             if (partner.password == hashedPassword) {
-                const token = jwt.sign({ id: partner.idPartner, username: partner.username }, 'exchange-secret-key', { expiresIn: '24h' });
+                const token = jwt.sign({ id: partner.idPartner, username: partner.username }, secretKey, { expiresIn: '24h' });
                 const userVerificationCode = crypto.randomBytes(3).toString('hex'); // Generate a random 6-digit verification code
                 res.json({ success: true, token: token, userVerificationCode: userVerificationCode });
 
