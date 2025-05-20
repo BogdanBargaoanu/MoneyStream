@@ -1,0 +1,55 @@
+\chapter{Potential Risks of the Implementation}
+
+\section{Potential Risks Summary}
+Implementing a unified adaptive security framework in a fintech context introduces multiple technical, operational, and compliance risks. Below in table \ref{tab:implementation-risks}, we enumerate the most critical risk categories, estimate their likelihood and impact, and provide a brief description for each.
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{p{3cm} c c p{7cm}}
+    \hline
+    \textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Description} \\
+    \hline
+    Cryptographic Weaknesses & Medium & High &
+      Reliance on MD5 for password hashing is vulnerable to collision attacks and rainbow‐table lookups; may lead to credential compromise. \\
+    Email 2FA Delivery Failures & Medium & Medium &
+      Delays, spam‐filtering, or delivery failures of time‐bound codes can lock out legitimate users or force fallback to weaker mechanisms. \\
+    JWT Key Management Errors & Low & High &
+      Incorrect storage, rotation, or revocation of encryption keys for JWTs can allow token replay or unauthorized access. \\
+    SQL Prepared‐Statement Misuse & Low & High &
+      Developer mistakes in parameter binding (e.g., concatenation instead of binding) can reintroduce SQL injection vulnerabilities. \\
+    Performance Overhead & Medium & Medium &
+      Real‐time risk assessments, encryption/decryption, and ML inference can introduce latency, degrading user experience or triggering session timeouts. \\
+    Key/Code Exposure in Logs & Medium & Medium &
+      Verbose error logging during development (e.g., printing JWT secrets or raw SQL) may leak sensitive information if not sanitized in production. \\
+    Dependency Vulnerabilities & Low & Medium &
+      Third‑party packages (e.g., nodemailer, jsonwebtoken) may contain unpatched flaws, exposing the platform to supply‑chain attacks. \\
+    \hline
+  \end{tabular}
+  \caption{Risk Assessment for Adaptive Security Implementation}
+  \label{tab:implementation-risks}
+\end{table}
+
+\section{Discussion of Key Risks}
+
+\subsection{Cryptographic Weaknesses}
+Although MD5 is supported by most platforms and easy to integrate, it is cryptographically broken and susceptible to pre‐computed attacks. Replacing MD5 with a stronger hashing function (e.g., bcrypt, Argon2) should be evaluated in a follow‐on phase to mitigate high‐impact credential leaks.
+
+\subsection{Email 2FA Delivery Failures}
+Time‐bound codes rely on external mail infrastructure. SLA breaches or misconfigurations at the SMTP provider can result in legitimate users being unable to authenticate, forcing calls or support tickets. Mitigation strategies include multi‐channel code delivery (SMS or authenticator apps) and configurable code expiration windows.
+
+\subsection{JWT Key Management Errors}
+Secure generation, storage, and rotation of private keys are critical. Mistakes in key lifecycle management—such as never revoking compromised keys—can lead to replay attacks. Integrating with a Hardware Security Module (HSM) or secret‐management service can reduce this risk.
+
+\subsection{Performance and User Experience}
+Adaptive controls (e.g., additional authentication steps for high‐risk sessions) may add latency. Profiling and load testing must be conducted to ensure that the overhead of real‐time risk calculations and cryptographic operations remains within acceptable UX thresholds (e.g., sub‐200ms API response times).
+
+\subsection{Regulatory and Compliance Exposure}
+Dynamic SCA exemptions under PSD2 and data‐minimization requirements under GDPR must be codified precisely. Any ambiguity or misconfiguration can incur regulatory fines, reputational damage, or mandatory audits. Close collaboration with legal and compliance teams is recommended throughout development.
+
+\subsection{Operational and Supply‑Chain Dependencies}
+Dependencies on open‐source packages (Express.js, crypto libraries, nodemailer) can introduce vulnerabilities if not actively maintained. A regular dependency audit process, automated vulnerability scanning, and an update policy will help mitigate the risk of third‐party exploits.
+
+\medskip
+
+Careful planning, ongoing threat modeling, and continuous integration of security testing (e.g., dynamic application security testing, regular pen‐tests, and fuzzing) are essential to manage and reduce these risks as the project evolves.
+

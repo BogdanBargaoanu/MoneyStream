@@ -1,0 +1,36 @@
+%\frontmatter
+%%%%%%%%%%% Stil pentru paginile de capăt
+\pagestyle{fancy}
+\setlength{\voffset}{-10pt}
+\setlength\headheight{70.0pt}
+%\addtolength{\textheight}{-80.0pt}
+\renewcommand{\headrulewidth}{0pt}
+\chead{%
+	\includegraphics[width=\textwidth]{figs/AntetUTCNEng.pdf}
+}
+\cfoot{}
+\lfoot{}
+\rfoot{}
+%\pagestyle{headings}
+%%%%% Thesis title page %%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+	{\department}
+
+	\vspace{4cm}
+	\makeThesisTitle %LICENSE THESIS TITLE
+	~\\~\\
+
+	\makeThesisType
+
+	~\\\vspace{6.5cm}
+
+	\begin{tabular}{p{.3\linewidth}p{.5\linewidth}}
+		{\hfill Student:} & {\bf \thesisauthor} \\
+		&\\
+		{\parbox[t]{\linewidth}{\hfill Scientific Coordinator:}}& {\bf \thesissupervisor}\\
+	\end{tabular}
+
+	\vspace{3cm}
+	{\bf \thesisyear}
+\end{center}
+%%%%%%%%%%%%%%%%% end of thesis title page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
