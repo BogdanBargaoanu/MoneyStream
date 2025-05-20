@@ -1,0 +1,50 @@
+\chapter{Conclusion}
+
+This project set out to design and implement a unified adaptive security framework tailored for modern fintech platforms. Motivated by the evolving threat landscape—where credential stuffing, SQL injections, and session hijacking remain prevalent—and driven by stringent regulatory requirements (PSD2 SCA, GDPR), we proposed a cohesive architecture that blends risk‑based authentication, robust input validation, and heuristic session controls.
+
+Over three agile sprints, the core components were developed and integrated:
+
+\begin{itemize}
+  \item \textbf{Secure Authentication Pipeline:}  
+    \begin{itemize}
+      \item Passwords are hashed at registration using MD5 (with a clear roadmap to stronger algorithms in future phases).
+      \item Login requests compare MD5 hashes against stored values, enforcing basic credential security.
+    \end{itemize}
+  \item \textbf{JWT Session Management \& SQL Hardening:}  
+    \begin{itemize}
+      \item Stateless sessions leverage short‑lived JWTs encrypted with HMAC-SHA256 and managed via secure key rotation.
+      \item All database interactions employ prepared statements and transaction boundaries to eliminate SQL injection risk.
+    \end{itemize}
+  \item \textbf{Email‑Based Two‑Factor Authentication:}  
+    \begin{itemize}
+      \item Time‑bound, six‑digit codes are delivered via email and verified before issuing session JWTs.
+      \item Fallback and error‑handling flows ensure that failed deliveries or mismatches produce clear user feedback without compromising security.
+    \end{itemize}
+\end{itemize}
+
+A comprehensive risk assessment identified key areas—cryptographic weaknesses, performance overhead, and regulatory compliance—alongside mitigation strategies such as integrating fallback authentication channels, profiling for latency budgets, and embedding ongoing legal review.
+
+\medskip
+
+\noindent\textbf{Contributions and Impact:}  
+This work delivers a practical blueprint for fintech security that balances robustness, usability, and compliance. By synthesizing best practices from NIST SP 800‑63B, OWASP ASVS, and industry case studies (e.g., AWS fraud monitoring), the framework advances beyond siloed solutions to offer:
+
+\begin{itemize}
+  \item A modular, extensible architecture suitable for both microservice and monolithic environments.
+  \item A risk‑aware authentication and session model that adapts in real time to emerging threats.
+  \item A development process integrating threat modeling, automated testing, and sprint‑based iterations.
+\end{itemize}
+
+\medskip
+
+\noindent\textbf{Future Work:}  
+Key avenues for extension include:
+
+\begin{itemize}
+  \item \textbf{Stronger Password Hashing:} Transition from MD5 to Argon2 or bcrypt, with salting and pepper strategies.
+  \item \textbf{Behavioral Biometrics:} Incorporate keystroke dynamics and device fingerprinting to reduce reliance on SMS/email.
+  \item \textbf{Advanced Anomaly Detection:} Deploy ensemble ML models alongside signature‑based filters, with online learning to adapt to new attack patterns.
+  \item \textbf{Regulatory Automation:} Embed policy engines that map session events to PSD2/GDPR requirements, generating audit reports automatically.
+\end{itemize}
+
+By addressing these areas, the platform can evolve to meet future fintech demands, ensuring that user trust, data integrity, and regulatory compliance remain at the forefront of digital financial services.
