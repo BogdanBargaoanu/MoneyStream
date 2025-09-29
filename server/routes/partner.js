@@ -49,12 +49,22 @@ const secretKey = process.env.SECRET_KEY;
 /* GET partners listing. */
 router.get('/', function (req, res, next) {
     const query = 'SELECT * FROM partner';
-    req.db.query(query, (err, result) => {
+    
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        res.json({ result, success: true });
+
+        connection.query(query, (err, result) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({ error: err.message, success: false });
+                return;
+            }
+            res.json({ result, success: true });
+        });
     });
 });
 
@@ -121,12 +131,22 @@ router.get('/:username', function (req, res, next) {
         res.status(400).json({ error: 'The request has missing information!', success: false });
         return;
     }
-    req.db.query(query, [req.params.username], (err, result) => {
+    
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        res.json({ result, success: true });
+
+        connection.query(query, [req.params.username], (err, result) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({ error: err.message, success: false });
+                return;
+            }
+            res.json({ result, success: true });
+        });
     });
 });
 
@@ -231,60 +251,81 @@ router.post('/addPartner', function (req, res, next) {
 
     // Hash the password using MD5
     const hashedPassword = crypto.createHash('md5').update(req.body.password).digest('hex');
-    req.db.beginTransaction((err) => {
-
+    
+    // Get connection from pool
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ success: false, error: err.message });
+            console.error('Database connection error:', err);
+            res.status(500).json({ success: false, error: 'Database connection failed' });
             return;
         }
 
-        req.db.query(checkPartner, [req.body.username, req.body.email], (err, result) => {
+        connection.beginTransaction((err) => {
             if (err) {
+                connection.release();
                 res.status(500).json({ success: false, error: err.message });
                 return;
             }
-            if (result[0]['count'] > 0) {
-                res.status(400).json({ success: false, error: 'The partner already exists!' });
-                return;
-            }
 
-            req.db.query(insertQuery, [req.body.username, req.body.email, hashedPassword, req.body.information], (err, result) => {
+            connection.query(checkPartner, [req.body.username, req.body.email], (err, result) => {
                 if (err) {
+                    connection.rollback(() => {
+                        connection.release();
+                    });
                     res.status(500).json({ success: false, error: err.message });
                     return;
                 }
+                if (result[0]['count'] > 0) {
+                    connection.rollback(() => {
+                        connection.release();
+                    });
+                    res.status(400).json({ success: false, error: 'The partner already exists!' });
+                    return;
+                }
 
-                req.db.commit((err) => {
+                connection.query(insertQuery, [req.body.username, req.body.email, hashedPassword, req.body.information], (err, result) => {
                     if (err) {
-                        return req.db.rollback(() => {
-                            res.status(500).json({ success: false, error: err.message });
+                        connection.rollback(() => {
+                            connection.release();
                         });
+                        res.status(500).json({ success: false, error: err.message });
+                        return;
                     }
-                    res.status(201).json({ success: true, message: 'Partner added successfully!' });
 
-                    // HTML content for the email
-                    const htmlContent = `
-                        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                            <h2 style="color: #4CAF50;">Welcome to MoneyStream, ${name}!</h2>
-                            <p>We are excited to have you on board. Here are some resources to get you started:</p>
-                            <ul>
-                                <li><a href="https://www.moneystream.com/getting-started">Getting Started Guide</a></li>
-                                <li><a href="https://www.moneystream.com/support">Support</a></li>
-                                <li><a href="https://www.moneystream.com/community">Community Forums</a></li>
-                            </ul>
-                            <p>Feel free to reach out to us if you have any questions.</p>
-                            <img src="https://i.imgur.com/0t2NQJM.png" alt="Welcome to MoneyStream" style="width: 100%; max-width: 300px; height: auto;"/>
-                            <p>Best regards,</p>
-                            <p>The MoneyStream Team</p>
-                        </div>
-                    `;
-                    // Send a welcome email
-                    sendEmail(
-                        email,
-                        'Welcome to MoneyStream',
-                        `Hello ${name}, welcome to MoneyStream!`,
-                        htmlContent
-                    );
+                    connection.commit((err) => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(500).json({ success: false, error: err.message });
+                            });
+                        }
+                        connection.release();
+                        res.status(201).json({ success: true, message: 'Partner added successfully!' });
+
+                        // HTML content for the email
+                        const htmlContent = `
+                            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                                <h2 style="color: #4CAF50;">Welcome to MoneyStream, ${name}!</h2>
+                                <p>We are excited to have you on board. Here are some resources to get you started:</p>
+                                <ul>
+                                    <li><a href="https://www.moneystream.com/getting-started">Getting Started Guide</a></li>
+                                    <li><a href="https://www.moneystream.com/support">Support</a></li>
+                                    <li><a href="https://www.moneystream.com/community">Community Forums</a></li>
+                                </ul>
+                                <p>Feel free to reach out to us if you have any questions.</p>
+                                <img src="https://i.imgur.com/0t2NQJM.png" alt="Welcome to MoneyStream" style="width: 100%; max-width: 300px; height: auto;"/>
+                                <p>Best regards,</p>
+                                <p>The MoneyStream Team</p>
+                            </div>
+                        `;
+                        // Send a welcome email
+                        sendEmail(
+                            email,
+                            'Welcome to MoneyStream',
+                            `Hello ${name}, welcome to MoneyStream!`,
+                            htmlContent
+                        );
+                    });
                 });
             });
         });
@@ -351,40 +392,49 @@ router.post('/login', function (req, res, next) {
     // Hash the password using MD5
     const hashedPassword = crypto.createHash('md5').update(password).digest('hex');
 
-    req.db.query(query, [username], (err, results) => {
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ success: false, error: err.message });
+            console.error('Database connection error:', err);
+            res.status(500).json({ success: false, error: 'Database connection failed' });
             return;
         }
-        if (results.length > 0) {
-            const partner = results[0];
-            if (partner.password == hashedPassword) {
-                const token = jwt.sign({ id: partner.idPartner, username: partner.username }, secretKey, { expiresIn: '24h' });
-                const userVerificationCode = crypto.randomBytes(3).toString('hex'); // Generate a random 6-digit verification code
-                res.json({ success: true, token: token, userVerificationCode: userVerificationCode });
 
-                // HTML content for the email
-                const htmlContent = `
-                    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                        <h2 style="color: #4CAF50;">Welcome back to MoneyStream!</h2>
-                        <p>Your verification code is: <strong>${userVerificationCode}</strong></p>
-                        <p>Best regards,</p>
-                        <p>The MoneyStream Team</p>
-                    </div>
-                `;
-                // Send a verification code email
-                sendEmail(
-                    partner.email,
-                    'MoneyStream Verification Code',
-                    `Hello ${partner.username}, your verification code is: ${userVerificationCode}`,
-                    htmlContent
-                );
+        connection.query(query, [username], (err, results) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({ success: false, error: err.message });
+                return;
+            }
+            if (results.length > 0) {
+                const partner = results[0];
+                if (partner.password == hashedPassword) {
+                    const token = jwt.sign({ id: partner.idPartner, username: partner.username }, secretKey, { expiresIn: '24h' });
+                    const userVerificationCode = crypto.randomBytes(3).toString('hex'); // Generate a random 6-digit verification code
+                    res.json({ success: true, token: token, userVerificationCode: userVerificationCode });
+
+                    // HTML content for the email
+                    const htmlContent = `
+                        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                            <h2 style="color: #4CAF50;">Welcome back to MoneyStream!</h2>
+                            <p>Your verification code is: <strong>${userVerificationCode}</strong></p>
+                            <p>Best regards,</p>
+                            <p>The MoneyStream Team</p>
+                        </div>
+                    `;
+                    // Send a verification code email
+                    sendEmail(
+                        partner.email,
+                        'MoneyStream Verification Code',
+                        `Hello ${partner.username}, your verification code is: ${userVerificationCode}`,
+                        htmlContent
+                    );
+                } else {
+                    res.status(401).json({ success: false, error: 'Incorrect login details!' });
+                }
             } else {
                 res.status(401).json({ success: false, error: 'Incorrect login details!' });
             }
-        } else {
-            res.status(401).json({ success: false, error: 'Incorrect login details!' });
-        }
+        });
     });
 });
 

@@ -64,12 +64,22 @@ router.get('/', function (req, res, next) {
   }
 
   const query = `SELECT * FROM currency`;
-  req.db.query(query, (err, result) => {
+  
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
-    res.json({ result, success: true });
+
+    connection.query(query, (err, result) => {
+      connection.release();
+      if (err) {
+        res.status(500).json({ error: err.message, success: false });
+        return;
+      }
+      res.json({ result, success: true });
+    });
   });
 });
 
@@ -115,12 +125,22 @@ router.get('/', function (req, res, next) {
 
 router.get('/public', function (req, res, next) {
   const query = `SELECT * FROM currency`;
-  req.db.query(query, (err, result) => {
+  
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
-    res.json({ result, success: true });
+
+    connection.query(query, (err, result) => {
+      connection.release();
+      if (err) {
+        res.status(500).json({ error: err.message, success: false });
+        return;
+      }
+      res.json({ result, success: true });
+    });
   });
 });
 
@@ -216,36 +236,55 @@ router.post('/insert', function (req, res, next) {
     res.status(400).json({ error: 'The name must have at most 50 characters!' });
     return;
   }
-  req.db.beginTransaction((err) => {
-
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
 
-    req.db.query(checkName, [req.body.name], (err, result) => {
+    connection.beginTransaction((err) => {
       if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      if (result[0]['count'] > 0) {
-        res.status(400).json({ error: 'The currency already exists!', success: false });
+        connection.release();
+        res.status(500).json({ error: err.message, success: false });
         return;
       }
 
-      req.db.query(insertQuery, [req.body.name, req.body.isUser], (err, result) => {
+      connection.query(checkName, [req.body.name], (err, result) => {
         if (err) {
-          res.status(500).json({ error: err.message, success: false });
+          connection.rollback(() => {
+            connection.release();
+          });
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        if (result[0]['count'] > 0) {
+          connection.rollback(() => {
+            connection.release();
+          });
+          res.status(400).json({ error: 'The currency already exists!', success: false });
           return;
         }
 
-        req.db.commit((err) => {
+        connection.query(insertQuery, [req.body.name, req.body.isUser], (err, result) => {
           if (err) {
-            return req.db.rollback(() => {
-              res.status(500).json({ error: err.message, success: false });
+            connection.rollback(() => {
+              connection.release();
             });
+            res.status(500).json({ error: err.message, success: false });
+            return;
           }
-          res.status(201).json({ message: 'Currency added successfully!', success: true });
+
+          connection.commit((err) => {
+            if (err) {
+              return connection.rollback(() => {
+                connection.release();
+                res.status(500).json({ error: err.message, success: false });
+              });
+            }
+            connection.release();
+            res.status(201).json({ message: 'Currency added successfully!', success: true });
+          });
         });
       });
     });
@@ -347,36 +386,55 @@ router.put('/update', function (req, res, next) {
     res.status(400).json({ error: 'The name must have at most 50 characters!', success: false });
     return;
   }
-  req.db.beginTransaction((err) => {
-
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
 
-    req.db.query(checkName, [req.body.name, req.body.idCurrency], (err, result) => {
+    connection.beginTransaction((err) => {
       if (err) {
+        connection.release();
         res.status(500).json({ error: err.message, success: false });
         return;
       }
-      if (result[0]['count'] > 0) {
-        res.status(400).json({ error: 'The currency name already exists!', success: false });
-        return;
-      }
 
-      req.db.query(updateQuery, [req.body.name, req.body.idCurrency], (err, result) => {
+      connection.query(checkName, [req.body.name, req.body.idCurrency], (err, result) => {
         if (err) {
+          connection.rollback(() => {
+            connection.release();
+          });
           res.status(500).json({ error: err.message, success: false });
           return;
         }
+        if (result[0]['count'] > 0) {
+          connection.rollback(() => {
+            connection.release();
+          });
+          res.status(400).json({ error: 'The currency name already exists!', success: false });
+          return;
+        }
 
-        req.db.commit((err) => {
+        connection.query(updateQuery, [req.body.name, req.body.idCurrency], (err, result) => {
           if (err) {
-            return req.db.rollback(() => {
-              res.status(500).json({ error: err.message, success: false });
+            connection.rollback(() => {
+              connection.release();
             });
+            res.status(500).json({ error: err.message, success: false });
+            return;
           }
-          res.json({ message: 'Currency updated successfully!', success: true });
+
+          connection.commit((err) => {
+            if (err) {
+              return connection.rollback(() => {
+                connection.release();
+                res.status(500).json({ error: err.message, success: false });
+              });
+            }
+            connection.release();
+            res.json({ message: 'Currency updated successfully!', success: true });
+          });
         });
       });
     });
@@ -467,25 +525,39 @@ router.delete('/delete', function (req, res, next) {
     return;
   }
 
-  req.db.beginTransaction((err) => {
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
 
-    req.db.query(deleteQuery, [req.body.idCurrency], (err, result) => {
+    connection.beginTransaction((err) => {
       if (err) {
+        connection.release();
         res.status(500).json({ error: err.message, success: false });
         return;
       }
 
-      req.db.commit((err) => {
+      connection.query(deleteQuery, [req.body.idCurrency], (err, result) => {
         if (err) {
-          return req.db.rollback(() => {
-            res.status(500).json({ error: err.message, success: false });
+          connection.rollback(() => {
+            connection.release();
           });
+          res.status(500).json({ error: err.message, success: false });
+          return;
         }
-        res.json({ message: 'Currency deleted successfully!', success: true });
+
+        connection.commit((err) => {
+          if (err) {
+            return connection.rollback(() => {
+              connection.release();
+              res.status(500).json({ error: err.message, success: false });
+            });
+          }
+          connection.release();
+          res.json({ message: 'Currency deleted successfully!', success: true });
+        });
       });
     });
   });

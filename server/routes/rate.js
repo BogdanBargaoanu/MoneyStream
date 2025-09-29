@@ -80,12 +80,22 @@ router.get('/', function (req, res, next) {
                     INNER JOIN currency ON rate.idCurrency = currency.idCurrency
                     WHERE location.idPartner = ${userId}
                     ORDER BY rate.date ASC`;
-    req.db.query(query, (err, result) => {
+    
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        res.json({ result, success: true });
+
+        connection.query(query, (err, result) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({ error: err.message, success: false });
+                return;
+            }
+            res.json({ result, success: true });
+        });
     });
 });
 
@@ -185,23 +195,39 @@ router.post('/insert', function (req, res, next) {
     const formattedDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
     const insertQuery = 'INSERT INTO rate (idLocation, idCurrency, date, value) VALUES (?, ?, ?, ?)';
 
-    req.db.beginTransaction((err) => {
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        req.db.query(insertQuery, [idLocation, idCurrency, formattedDate, value], (err, result) => {
+
+        connection.beginTransaction((err) => {
             if (err) {
+                connection.release();
                 res.status(500).json({ error: err.message, success: false });
                 return;
             }
-            req.db.commit((err) => {
+            
+            connection.query(insertQuery, [idLocation, idCurrency, formattedDate, value], (err, result) => {
                 if (err) {
-                    return req.db.rollback(() => {
-                        res.status(500).json({ error: err.message, success: false });
+                    connection.rollback(() => {
+                        connection.release();
                     });
+                    res.status(500).json({ error: err.message, success: false });
+                    return;
                 }
-                res.status(201).json({ message: 'Rate added successfully!', success: true });
+                
+                connection.commit((err) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ error: err.message, success: false });
+                        });
+                    }
+                    connection.release();
+                    res.status(201).json({ message: 'Rate added successfully!', success: true });
+                });
             });
         });
     });
@@ -305,24 +331,39 @@ router.put('/update', function (req, res, next) {
     const formattedDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
     const updateQuery = 'UPDATE rate SET idLocation = ?, idCurrency = ?, date = ?, value = ? WHERE idRates = ?';
 
-    req.db.beginTransaction((err) => {
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        req.db.query(updateQuery, [idLocation, idCurrency, formattedDate, value, idRates], (err, result) => {
+
+        connection.beginTransaction((err) => {
             if (err) {
+                connection.release();
                 res.status(500).json({ error: err.message, success: false });
                 return;
             }
-
-            req.db.commit((err) => {
+            
+            connection.query(updateQuery, [idLocation, idCurrency, formattedDate, value, idRates], (err, result) => {
                 if (err) {
-                    return req.db.rollback(() => {
-                        res.status(500).json({ error: err.message, success: false });
+                    connection.rollback(() => {
+                        connection.release();
                     });
+                    res.status(500).json({ error: err.message, success: false });
+                    return;
                 }
-                res.json({ message: 'Rate updated successfully!', success: true });
+
+                connection.commit((err) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ error: err.message, success: false });
+                        });
+                    }
+                    connection.release();
+                    res.json({ message: 'Rate updated successfully!', success: true });
+                });
             });
         });
     });
@@ -414,25 +455,39 @@ router.delete('/delete', function (req, res, next) {
     }
     const deleteQuery = 'DELETE FROM rate WHERE idRates = ?';
 
-    req.db.beginTransaction((err) => {
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
 
-        req.db.query(deleteQuery, [idRates], (err, result) => {
+        connection.beginTransaction((err) => {
             if (err) {
+                connection.release();
                 res.status(500).json({ error: err.message, success: false });
                 return;
             }
 
-            req.db.commit((err) => {
+            connection.query(deleteQuery, [idRates], (err, result) => {
                 if (err) {
-                    return req.db.rollback(() => {
-                        res.status(500).json({ error: err.message, success: false });
+                    connection.rollback(() => {
+                        connection.release();
                     });
+                    res.status(500).json({ error: err.message, success: false });
+                    return;
                 }
-                res.json({ message: 'Rate deleted successfully!', success: true });
+
+                connection.commit((err) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ error: err.message, success: false });
+                        });
+                    }
+                    connection.release();
+                    res.json({ message: 'Rate deleted successfully!', success: true });
+                });
             });
         });
     });
@@ -536,12 +591,22 @@ router.get('/nearest', function (req, res, next) {
         LIMIT ${limit} OFFSET ${offset}`;
 
     console.log(query);
-    req.db.query(query, (err, result) => {
+    
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        res.json({ result, page: page, success: true });
+
+        connection.query(query, (err, result) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({ error: err.message, success: false });
+                return;
+            }
+            res.json({ result, page: page, success: true });
+        });
     });
 });
 
@@ -597,12 +662,22 @@ router.get('/allRates', function (req, res, next) {
                     INNER JOIN location ON rate.idLocation = location.idLocation
                     INNER JOIN currency ON rate.idCurrency = currency.idCurrency
                     ORDER BY rate.date DESC`;
-    req.db.query(query, (err, result) => {
+    
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        res.json({ result, success: true });
+
+        connection.query(query, (err, result) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({ error: err.message, success: false });
+                return;
+            }
+            res.json({ result, success: true });
+        });
     });
 });
 

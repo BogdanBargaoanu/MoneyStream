@@ -74,12 +74,22 @@ router.get('/', function (req, res, next) {
   }
 
   const query = `SELECT * FROM location`;
-  req.db.query(query, (err, result) => {
+  
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
-    res.json({ result, success: true });
+
+    connection.query(query, (err, result) => {
+      connection.release();
+      if (err) {
+        res.status(500).json({ error: err.message, success: false });
+        return;
+      }
+      res.json({ result, success: true });
+    });
   });
 });
 
@@ -159,12 +169,21 @@ router.get('/partner', function (req, res, next) {
                 FROM location
                 INNER JOIN partner ON location.idPartner = partner.idPartner
                 WHERE location.idPartner = ?`;
-  req.db.query(query, [idPartner], (err, result) => {
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
-    res.json({ result, success: true });
+
+    connection.query(query, [idPartner], (err, result) => {
+      connection.release();
+      if (err) {
+        res.status(500).json({ error: err.message, success: false });
+        return;
+      }
+      res.json({ result, success: true });
+    });
   });
 });
 
@@ -267,35 +286,55 @@ router.post('/insert', function (req, res, next) {
     return;
   }
 
-  req.db.beginTransaction((err) => {
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
 
-    req.db.query(checkLocation, [address], (err, result) => {
+    connection.beginTransaction((err) => {
       if (err) {
+        connection.release();
         res.status(500).json({ error: err.message, success: false });
         return;
       }
-      if (result[0]['count'] > 0) {
-        res.status(400).json({ error: 'The location already exists!', success: false });
-        return;
-      }
 
-      req.db.query(insertQuery, [userId, address, latitude, longitude, information], (err, result) => {
+      connection.query(checkLocation, [address], (err, result) => {
         if (err) {
+          connection.rollback(() => {
+            connection.release();
+          });
           res.status(500).json({ error: err.message, success: false });
           return;
         }
+        if (result[0]['count'] > 0) {
+          connection.rollback(() => {
+            connection.release();
+          });
+          res.status(400).json({ error: 'The location already exists!', success: false });
+          return;
+        }
 
-        req.db.commit((err) => {
+        connection.query(insertQuery, [userId, address, latitude, longitude, information], (err, result) => {
           if (err) {
-            return req.db.rollback(() => {
-              res.status(500).json({ error: err.message, success: false });
+            connection.rollback(() => {
+              connection.release();
             });
+            res.status(500).json({ error: err.message, success: false });
+            return;
           }
-          res.status(201).json({ message: 'Location added successfully!', success: true });
+
+          connection.commit((err) => {
+            if (err) {
+              return connection.rollback(() => {
+                connection.release();
+                res.status(500).json({ error: err.message, success: false });
+              });
+            }
+            connection.release();
+            res.status(201).json({ message: 'Location added successfully!', success: true });
+          });
         });
       });
     });
@@ -403,35 +442,55 @@ router.put('/update', function (req, res, next) {
   const updateQuery = 'UPDATE location SET address = ?, latitude = ?, longitude = ?, information = ? WHERE idLocation = ?';
   const checkLocation = 'SELECT COUNT(idLocation) AS count FROM location WHERE idPartner = ? AND address = ? AND idLocation != ?';
 
-  req.db.beginTransaction((err) => {
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
 
-    req.db.query(checkLocation, [userId, address, idLocation], (err, result) => {
+    connection.beginTransaction((err) => {
       if (err) {
+        connection.release();
         res.status(500).json({ error: err.message, success: false });
         return;
       }
-      if (result[0]['count'] > 0) {
-        res.status(400).json({ error: 'The location already exists!', success: false });
-        return;
-      }
 
-      req.db.query(updateQuery, [address, latitude, longitude, information, idLocation, userId], (err, result) => {
+      connection.query(checkLocation, [userId, address, idLocation], (err, result) => {
         if (err) {
+          connection.rollback(() => {
+            connection.release();
+          });
           res.status(500).json({ error: err.message, success: false });
           return;
         }
+        if (result[0]['count'] > 0) {
+          connection.rollback(() => {
+            connection.release();
+          });
+          res.status(400).json({ error: 'The location already exists!', success: false });
+          return;
+        }
 
-        req.db.commit((err) => {
+        connection.query(updateQuery, [address, latitude, longitude, information, idLocation, userId], (err, result) => {
           if (err) {
-            return req.db.rollback(() => {
-              res.status(500).json({ error: err.message, success: false });
+            connection.rollback(() => {
+              connection.release();
             });
+            res.status(500).json({ error: err.message, success: false });
+            return;
           }
-          res.json({ message: 'Location updated successfully!', success: true });
+
+          connection.commit((err) => {
+            if (err) {
+              return connection.rollback(() => {
+                connection.release();
+                res.status(500).json({ error: err.message, success: false });
+              });
+            }
+            connection.release();
+            res.json({ message: 'Location updated successfully!', success: true });
+          });
         });
       });
     });
@@ -523,25 +582,39 @@ router.delete('/delete', function (req, res, next) {
     return;
   }
 
-  req.db.beginTransaction((err) => {
+  req.db.getConnection((err, connection) => {
     if (err) {
-      res.status(500).json({ error: err.message, success: false });
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Database connection failed', success: false });
       return;
     }
 
-    req.db.query(deleteQuery, [idLocation], (err, result) => {
+    connection.beginTransaction((err) => {
       if (err) {
+        connection.release();
         res.status(500).json({ error: err.message, success: false });
         return;
       }
 
-      req.db.commit((err) => {
+      connection.query(deleteQuery, [idLocation], (err, result) => {
         if (err) {
-          return req.db.rollback(() => {
-            res.status(500).json({ error: err.message, success: false });
+          connection.rollback(() => {
+            connection.release();
           });
+          res.status(500).json({ error: err.message, success: false });
+          return;
         }
-        res.json({ message: 'Location deleted successfully!', success: true });
+
+        connection.commit((err) => {
+          if (err) {
+            return connection.rollback(() => {
+              connection.release();
+              res.status(500).json({ error: err.message, success: false });
+            });
+          }
+          connection.release();
+          res.json({ message: 'Location deleted successfully!', success: true });
+        });
       });
     });
   });

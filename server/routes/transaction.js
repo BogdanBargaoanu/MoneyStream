@@ -112,12 +112,21 @@ router.get('/', function (req, res, next) {
         WHERE l.idPartner = ${userId}
         ORDER BY t.idTransaction ASC`;
 
-    req.db.query(query, (err, result) => {
+    req.db.getConnection((err, connection) => {
         if (err) {
-            res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            res.status(500).json({ error: 'Database connection failed', success: false });
             return;
         }
-        res.json({ result, success: true });
+
+        connection.query(query, (err, result) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({ error: err.message, success: false });
+                return;
+            }
+            res.json({ result, success: true });
+        });
     });
 });
 
@@ -214,23 +223,36 @@ router.post('/', function (req, res, next) {
     }
 
     const query = `INSERT INTO transaction (idRate, idPartnerRate, value) VALUES (?, ?, ?)`;
-    req.db.beginTransaction((err) => {
+    req.db.getConnection((err, connection) => {
         if (err) {
-            return res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            return res.status(500).json({ error: 'Database connection failed', success: false });
         }
-        req.db.query(query, [idRate, idPartnerRate || null, value], (err, result) => {
+
+        connection.beginTransaction((err) => {
             if (err) {
-                return req.db.rollback(() => {
-                    res.status(500).json({ error: err.message, success: false });
-                });
+                connection.release();
+                return res.status(500).json({ error: err.message, success: false });
             }
-            req.db.commit((err) => {
+            
+            connection.query(query, [idRate, idPartnerRate || null, value], (err, result) => {
                 if (err) {
-                    return req.db.rollback(() => {
+                    return connection.rollback(() => {
+                        connection.release();
                         res.status(500).json({ error: err.message, success: false });
                     });
                 }
-                res.status(201).json({ id: result.insertId, success: true });
+                
+                connection.commit((err) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ error: err.message, success: false });
+                        });
+                    }
+                    connection.release();
+                    res.status(201).json({ id: result.insertId, success: true });
+                });
             });
         });
     })
@@ -308,26 +330,39 @@ router.delete('/delete', function (req, res, next) {
 
     const query = `DELETE FROM transaction WHERE idTransaction = ?`;
 
-    req.db.beginTransaction((err) => {
+    req.db.getConnection((err, connection) => {
         if (err) {
-            return res.status(500).json({ error: err.message, success: false });
+            console.error('Database connection error:', err);
+            return res.status(500).json({ error: 'Database connection failed', success: false });
         }
 
-        req.db.query(query, [transactionId], (err, result) => {
+        connection.beginTransaction((err) => {
             if (err) {
+                connection.release();
                 return res.status(500).json({ error: err.message, success: false });
             }
 
-            req.db.commit((err) => {
+            connection.query(query, [transactionId], (err, result) => {
                 if (err) {
-                    return req.db.rollback(() => {
-                        res.status(500).json({ error: err.message, success: false });
+                    connection.rollback(() => {
+                        connection.release();
                     });
+                    return res.status(500).json({ error: err.message, success: false });
                 }
-                if (result.affectedRows === 0) {
-                    return res.status(404).json({ error: 'Transaction not found', success: false });
-                }
-                res.json({ message: 'Transaction deleted successfully!', success: true });
+
+                connection.commit((err) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ error: err.message, success: false });
+                        });
+                    }
+                    connection.release();
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ error: 'Transaction not found', success: false });
+                    }
+                    res.json({ message: 'Transaction deleted successfully!', success: true });
+                });
             });
         });
     });
