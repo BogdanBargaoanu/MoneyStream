@@ -45,7 +45,8 @@ const mysql = require('mysql');
 const db = mysql.createConnection({
   host: process.env.MYSQL_HOST,
   user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASS
+  password: process.env.MYSQL_PASS,
+  port: process.env.MYSQL_PORT
 });
 
 db.connect((err) => {
@@ -54,14 +55,14 @@ db.connect((err) => {
   }
   else {
     // Create database if it doesn't exist
-    db.query('CREATE DATABASE IF NOT EXISTS exchange', (err, result) => {
+    db.query(`CREATE DATABASE IF NOT EXISTS ${process.env.MYSQL_DB}`, (err, result) => {
       if (err) {
         throw err;
       }
       console.log('Database created or already exists.');
 
       // Connect to the newly created or existing database
-      db.changeUser({ database: 'exchange' }, (err) => {
+      db.changeUser({ database: process.env.MYSQL_DB }, (err) => {
         if (err) {
           throw err;
         }
@@ -72,10 +73,10 @@ db.connect((err) => {
                                 email VARCHAR(100) NOT NULL,
                                 password VARCHAR(100) NOT NULL,
                                 information VARCHAR(6000) NULL,
-                                UNIQUE INDEX idPartner_UNIQUE (idPartner ASC) VISIBLE,
+                                UNIQUE INDEX idPartner_UNIQUE (idPartner ASC),
                                 PRIMARY KEY (idPartner),
-                                UNIQUE INDEX username_UNIQUE (username ASC) VISIBLE,
-                                UNIQUE INDEX email_UNIQUE (email ASC) VISIBLE)`;
+                                UNIQUE INDEX username_UNIQUE (username ASC),
+                                UNIQUE INDEX email_UNIQUE (email ASC))`;
         var createLocationTable = `CREATE TABLE IF NOT EXISTS location (
                                 idLocation INT NOT NULL AUTO_INCREMENT,
                                 idPartner INT NOT NULL,
@@ -84,8 +85,8 @@ db.connect((err) => {
                                 address VARCHAR(200) NOT NULL,
                                 information VARCHAR(6000) NULL,
                                 PRIMARY KEY (idLocation),
-                                UNIQUE INDEX idLocations_UNIQUE (idLocation ASC) VISIBLE,
-                                INDEX FK_PartnerLocation_idx (idPartner ASC) VISIBLE,
+                                UNIQUE INDEX idLocations_UNIQUE (idLocation ASC),
+                                INDEX FK_PartnerLocation_idx (idPartner ASC),
                                 CONSTRAINT FK_PartnerLocation
                                   FOREIGN KEY (idPartner)
                                   REFERENCES partner (idPartner)
@@ -95,8 +96,8 @@ db.connect((err) => {
                                 idCurrency INT NOT NULL AUTO_INCREMENT,
                                 name VARCHAR(50) NOT NULL,
                                 PRIMARY KEY (idCurrency),
-                                UNIQUE INDEX idCurrency_UNIQUE (idCurrency ASC) VISIBLE,
-                                UNIQUE INDEX name_UNIQUE (name ASC) VISIBLE)`;
+                                UNIQUE INDEX idCurrency_UNIQUE (idCurrency ASC),
+                                UNIQUE INDEX name_UNIQUE (name ASC))`;
         var createRateTable = `CREATE TABLE IF NOT EXISTS rate (
                             idRates INT NOT NULL AUTO_INCREMENT,
                             idLocation INT NOT NULL,
@@ -104,9 +105,9 @@ db.connect((err) => {
                             date DATETIME NOT NULL,
                             value DECIMAL(10,6) NOT NULL,
                             PRIMARY KEY (idRates),
-                            UNIQUE INDEX idRates_UNIQUE (idRates ASC) VISIBLE,
-                            INDEX FK_LocationRate_idx (idLocation ASC) VISIBLE,
-                            INDEX FK_CurrencyRate_idx (idCurrency ASC) VISIBLE,
+                            UNIQUE INDEX idRates_UNIQUE (idRates ASC),
+                            INDEX FK_LocationRate_idx (idLocation ASC),
+                            INDEX FK_CurrencyRate_idx (idCurrency ASC),
                             CONSTRAINT FK_LocationRate
                               FOREIGN KEY (idLocation)
                               REFERENCES location (idLocation)
@@ -123,9 +124,9 @@ db.connect((err) => {
                                       idPartnerRate INT NULL,
                                       value DECIMAL(10,6) NOT NULL,
                                       PRIMARY KEY (idTransaction),
-                                      UNIQUE INDEX idTransaction_UNIQUE (idTransaction ASC) VISIBLE,
-                                      INDEX FK_RateTransaction_idx (idRate ASC) VISIBLE,
-                                      INDEX FK_PartnerRateTransaction_idx (idPartnerRate ASC) VISIBLE,
+                                      UNIQUE INDEX idTransaction_UNIQUE (idTransaction ASC),
+                                      INDEX FK_RateTransaction_idx (idRate ASC),
+                                      INDEX FK_PartnerRateTransaction_idx (idPartnerRate ASC),
                                       CONSTRAINT FK_RateTransaction
                                         FOREIGN KEY (idRate)
                                         REFERENCES rate (idRates)
