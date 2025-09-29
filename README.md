@@ -44,6 +44,11 @@
  - Featured in **Internet of Things Student Challange 2025**
  - Featured in **InnovationLabs 2025**
 
+## Deployment
+- Admin panel: https://moneystream.onrender.com/
+- Client panel: https://moneystreamclient.onrender.com/
+- API Documentation: https://moneystreamapi.onrender.com/api/
+
 ## Documentation 
 
 For a comprehensive documentation of this project, including system architecture, implementation details, please refer to the attached PDF document.
