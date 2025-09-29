@@ -42,31 +42,58 @@ app.use('/api', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 // mysql setup
 const mysql = require('mysql');
 
-const db = mysql.createConnection({
+// Create connection pool for better connection handling
+const db = mysql.createPool({
+  connectionLimit: 10,
   host: process.env.MYSQL_HOST,
   user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASS,
-  port: process.env.MYSQL_PORT
+  port: process.env.MYSQL_PORT,
+  database: process.env.MYSQL_DB,
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
+  handleDisconnects: true
 });
 
-db.connect((err) => {
-  if (err) {
+// Handle connection pool errors
+db.on('connection', function (connection) {
+  console.log('Database connected as id ' + connection.threadId);
+});
+
+db.on('error', function(err) {
+  console.error('Database error:', err);
+  if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.log('Database connection lost. Pool will handle reconnection.');
+  } else {
     throw err;
   }
-  else {
-    // Create database if it doesn't exist
-    db.query(`CREATE DATABASE IF NOT EXISTS ${process.env.MYSQL_DB}`, (err, result) => {
+});
+
+// Initialize database and tables
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error connecting to database:', err);
+    throw err;
+  }
+  
+  console.log('Connected to database.');
+  
+  // Create database if it doesn't exist
+  connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.MYSQL_DB}`, (err, result) => {
+    if (err) {
+      connection.release();
+      throw err;
+    }
+    console.log('Database created or already exists.');
+    
+    // Use the database
+    connection.query(`USE ${process.env.MYSQL_DB}`, (err, result) => {
       if (err) {
+        connection.release();
         throw err;
       }
-      console.log('Database created or already exists.');
-
-      // Connect to the newly created or existing database
-      db.changeUser({ database: process.env.MYSQL_DB }, (err) => {
-        if (err) {
-          throw err;
-        }
-        console.log('Connected to database.');
+      console.log('Using database.');
         var createPartnerTable = `CREATE TABLE IF NOT EXISTS partner (
                                 idPartner INT NOT NULL AUTO_INCREMENT,
                                 username VARCHAR(100) NOT NULL,
@@ -138,54 +165,66 @@ db.connect((err) => {
                                         ON DELETE CASCADE
                                         ON UPDATE NO ACTION);
 `
-        db.query(createPartnerTable, (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          else {
-            console.log('Partner table checked/created successfully.');
-          }
-        });
-        db.query(createLocationTable, (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          else {
-            console.log('Location table checked/created successfully.');
-          }
-        });
-        db.query(createCurrencyTable, (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          else {
-            console.log('Currency table checked/created successfully.');
-          }
-        });
-        db.query(createRateTable, (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          else {
-            console.log('Rate table checked/created successfully.');
-          }
-        });
-        db.query(createTransactionsTable, (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          else {
-            console.log('Transactions table checked/created successfully.');
-          }
-        });
+      // Create tables
+      connection.query(createPartnerTable, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          console.log('Partner table checked/created successfully.');
+        }
       });
+      connection.query(createLocationTable, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          console.log('Location table checked/created successfully.');
+        }
+      });
+      connection.query(createCurrencyTable, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          console.log('Currency table checked/created successfully.');
+        }
+      });
+      connection.query(createRateTable, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          console.log('Rate table checked/created successfully.');
+        }
+      });
+      connection.query(createTransactionsTable, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          console.log('Transactions table checked/created successfully.');
+        }
+      });
+      
+      // Release the connection back to the pool
+      connection.release();
     });
-  }
+  });
 });
 
-// make db accessible to your routes
+// make db accessible to your routes with error handling
 app.use((req, res, next) => {
   req.db = db;
+  req.getConnection = (callback) => {
+    db.getConnection((err, connection) => {
+      if (err) {
+        console.error('Error getting connection from pool:', err);
+        return callback(err, null);
+      }
+      callback(null, connection);
+    });
+  };
   next();
 });
 
